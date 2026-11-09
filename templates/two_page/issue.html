@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Kelp Korner | {{ISSUE_TITLE}}</title><link rel="stylesheet" href="issue.css"></head><body>
+<div id="layout-warning" role="alert" hidden>Page 2 content may extend beyond the printable area. Shorten the story text or reduce image size before exporting.</div>
 <main>
   <section class="page page-one">
     <div class="cover-photo" role="img" aria-label="Sunlight filtering into a giant kelp forest, with fish among the kelp fronds">
@@ -11,19 +12,49 @@
     </div>
     <div class="below-cover">
       <div class="intro-copy"><span class="eyebrow">FROM THE LAB</span><h2>A closer look beneath the surface.</h2><p>{{INTRO}}</p></div>
-      <div class="issue-menu"><span class="eyebrow">INSIDE THIS ISSUE</span><div><b>01</b> {{MENU1}}</div><div><b>02</b> {{MENU2}}</div><div><b>03</b> {{MENU3}}</div></div>
+      <div class="issue-menu"><span class="eyebrow">INSIDE THIS ISSUE</span>{{ISSUE_MENU}}</div>
     </div>
     <div class="thin-footer"><span>NERG / KELP KORNER</span><span>01 — 02</span></div>
   </section>
   <section class="page page-two">
     <header class="page-two-head"><div><span class="eyebrow">KELP KORNER / {{SEASON}}</span><h2>Notes from<br>the nearshore<span class="period">.</span></h2></div><div class="circle-mark">N<br>E<br>R<br>G</div></header>
-    <div class="feature-block"><div class="feature-number">01 / LAB UPDATES</div><div class="feature-main"><h3>{{STORY1_TITLE}}</h3><p>{{STORY1_BODY}}</p><p class="micro">{{STORY1_CATEGORY}}</p></div></div>
-    <div class="double">
-      <article class="story"><span class="tag">02 / LAB UPDATES</span><div class="rule"></div><h3>{{STORY2_TITLE}}</h3><p>{{STORY2_BODY}}</p><p class="note">{{STORY2_NOTE}}</p></article>
-      <article class="story sage"><span class="tag">03 / LAB UPDATES</span><div class="rule"></div><h3>{{STORY3_TITLE}}</h3><p>{{STORY3_BODY}}</p><p class="note">{{STORY3_NOTE}}</p></article>
+    <div class="feature-block {{FEATURE_CLASS}}">
+      <div class="feature-left"><div class="feature-number">01 / FEATURED UPDATE</div>{{FEATURE_MEDIA}}</div>
+      <div class="feature-main"><h3>{{STORY1_TITLE}}</h3><p>{{STORY1_BODY}}</p><p class="micro">{{STORY1_CATEGORY}}</p></div>
     </div>
+    {{SECONDARY_STORIES}}
     <div class="closing"><div class="closing-eyebrow">LOOKING AHEAD</div><p>{{CLOSING}}</p><div class="closing-links"><span>FOLLOW THE RESEARCH</span><a href="https://smithlab.ucsc.edu">smithlab.ucsc.edu ↗</a></div></div>
     <footer class="page-two-footer"><span>NEARSHORE ECOLOGY RESEARCH GROUP · UC SANTA CRUZ</span><span>02 — 02</span></footer>
   </section>
 </main>
+<script>
+(function () {
+  function checkLayout() {
+    const page = document.querySelector('.page-two');
+    const closing = page.querySelector('.closing');
+    const footer = page.querySelector('.page-two-footer');
+    const warning = document.getElementById('layout-warning');
+    const overlap = closing.getBoundingClientRect().bottom > footer.getBoundingClientRect().top - 10;
+    const overflow = page.scrollHeight > page.clientHeight + 2;
+    warning.hidden = !(overlap || overflow);
+    // For environments without R magick, classify the image in the browser.
+  }
+  const img = document.querySelector('.feature-photo img');
+  if (img) {
+    function setOrientation() {
+      const panel = document.querySelector('.feature-block');
+      if (panel.classList.contains('auto-orientation')) {
+        panel.classList.remove('auto-orientation');
+        const ratio = img.naturalWidth / img.naturalHeight;
+        panel.classList.add(ratio < .85 ? 'portrait' : ratio > 1.2 ? 'landscape' : 'square');
+      }
+      checkLayout();
+    }
+    if (img.complete) setOrientation(); else img.addEventListener('load', setOrientation);
+  }
+  window.addEventListener('load', checkLayout);
+  window.addEventListener('resize', checkLayout);
+  window.addEventListener('beforeprint', checkLayout);
+})();
+</script>
 </body></html>
