@@ -16,7 +16,7 @@ required_files <- c(
   "R/build_two_page.R",
   "templates/two_page/issue.html",
   "templates/two_page/issue.css",
-  "images/branding/kelp-forest.jpg"
+  "images/branding/smith-lab-logo.png"
 )
 missing_files <- required_files[!file.exists(required_files)]
 if (length(missing_files)) {

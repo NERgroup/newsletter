@@ -1,29 +1,25 @@
-# Kelp Korner — adaptive second-page layout
+# Kelp Korner — final visual and editorial refinements
 
-Updates ONLY:
-- `R/build_two_page.R`
-- `templates/two_page/issue.html`
-- `templates/two_page/issue.css`
+This patch is based on the existing November 9 logo-and-editorial workflow. It updates only:
 
-The existing cover design, Google Sheet, Drive access, AI draft script, and master command are preserved.
+- `templates/two_page/issue.html` — removes duplicate standalone Follow the Research link below the closing panel. Keeps the styled clickable link within the panel.
+- `templates/two_page/issue.css` — slightly adjusts the cover logo placement and two-story featured image, and fine-tunes card spacing.
+- `R/draft_with_ai.R` — improves instructions for a connected, evidence-grounded quarterly introduction.
 
-## Install
-
-Unzip the archive contents into your existing `nerg_newsletter` repository folder, replacing those three files. The exact Terminal command from the repository directory is:
+**Install from the project folder in RStudio Terminal:**
 
 ```bash
-unzip -o ~/Downloads/kelp-korner-layout-update.zip
+cd /Users/jossmith/code_respositories/nerg_newsletter
+unzip -o ~/Downloads/kelp-korner-final-refinements.zip
 ```
 
-## Preview in RStudio
+**Test in the RStudio Console:**
 
 ```r
 Sys.setenv(NEWSLETTER_QUARTER = "2026-Q4")
 source("R/create_newsletter.R")
 ```
 
-The script makes an AI call as before. To re-render an existing draft without a new API call, set NEWSLETTER_DRAFT_PATH to the exact latest editorial CSV and run `source("R/build_two_page.R")`.
+The AI drafting step makes a new billable API call. Nothing is published. The template still draws the quarterly cover from Drive, includes all approved stories, and targets a maximum of three pages. Examine the browser warning and print-page count, especially after adding five or six stories. These edits do not guarantee the full issue will fit if there is too much content.
 
-The number of stories drives the layout automatically (1 / 2 / 3). No empty secondary story boxes. Featured photographs are always uncropped and are placed in an image column whose width follows their orientation. If `magick` is installed, R recognizes the orientation; otherwise the browser does so after the image loads. No photo is generated or modified. 
-
-A visible warning appears in browser preview when page 2 content collides with its footer. The two-page design is retained; always inspect the printed PDF before sharing. Nothing publishes automatically.
+No changes to Google Drive folder structure or source media. Keep your existing `R/build_two_page.R`, `R/create_newsletter.R`, and Google integration scripts.

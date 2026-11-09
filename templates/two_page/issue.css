@@ -526,3 +526,207 @@ h1 {
 @media print {#layout-warning {display:none !important;} }
 /* Reserve clear space for the anchored footer instead of clipping content. */
 .page-two { padding-bottom: .76in; }
+
+/* ============================================================
+   OPTIONAL THIRD PAGE — SAME VISUAL IDENTITY
+   ============================================================ */
+.page-three {
+  padding: .47in .58in .76in;
+  display: flex;
+  flex-direction: column;
+}
+.page-three .page-two-head { flex: 0 0 1.69in; }
+.third-stories {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: .22in;
+  margin-top: .32in;
+  align-content: start;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.third-stories .story {
+  min-height: 1.7in;
+  padding: .28in .28in .24in;
+}
+.third-stories .story h3 {font-size:23px; margin-bottom:12px;}
+.third-stories .story p {font-size:12px; line-height:1.5;}
+.third-stories .story .note {margin-top:auto; padding-top:.2in;}
+.third-stories:has(> :only-child) {grid-template-columns: 1fr;}
+.page-three .closing {flex: 0 0 auto; min-height: 1.3in; margin-top: .24in;}
+@media print {
+  .page-three {break-after: auto; page-break-after: auto;}
+}
+
+/* ============================================================
+   LINKED PHOTOS ON SECONDARY STORIES (PAGES 2 AND 3)
+   Keeps original aspect ratio; no forced cropping.
+   ============================================================ */
+.story-photo {
+  margin: 0 0 12px;
+  width: 100%;
+  flex: 0 0 auto;
+}
+.story-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 1.45in;
+  object-fit: contain;
+  object-position: left center;
+  border-radius: 2px;
+}
+.story-photo figcaption {
+  color: #477569;
+  font-size: 8px;
+  line-height: 1.35;
+  margin-top: 5px;
+}
+.third-stories .story-photo img { max-height: 1.6in; }
+.secondary-list .story-photo img { max-height: 1.25in; }
+
+/* ============================================================
+   STABLE MULTI-PHOTO STORY CARDS — LAYOUT REPAIR
+   Keep image and copy in the SAME flow box; never shrink a card
+   below the height needed by its children.
+   ============================================================ */
+.secondary-list {
+  flex: 0 0 auto;
+  min-height: auto;
+  align-content: start;
+  align-items: stretch;
+  margin-top: .23in;
+  gap: .16in;
+}
+.secondary-list .story,
+.third-stories .story {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+  padding: .20in .23in .18in;
+}
+.secondary-list:has(> :only-child) .story {max-height: none;}
+.secondary-list .story .rule,
+.third-stories .story .rule { margin: .12in 0 .12in; }
+.story-inner {display: block; min-width: 0;}
+.story-copy {min-width: 0; display: flex; flex-direction: column;}
+.story-copy h3 { margin: 0 0 10px; }
+.story-copy p {margin: 0;}
+.story-copy .note {
+  margin-top: 10px !important;
+  padding-top: 0 !important;
+}
+.story-inner .story-photo {margin: 0 0 10px; min-width: 0;}
+.story-inner .story-photo img {
+  display:block;
+  max-height: 1.20in;
+  max-width:100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  object-position: left top;
+}
+/* Single secondary story: image beside text, not above it. */
+.secondary-list:has(> :only-child) .story.has-photo .story-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.60in) minmax(0, 1fr);
+  gap: .22in;
+  align-items: start;
+}
+.secondary-list:has(> :only-child) .story .story-photo {margin: 0;}
+.secondary-list:has(> :only-child) .story .story-photo img {
+  width: auto;
+  max-width: 100%;
+  max-height: 1.92in;
+}
+.secondary-list:has(> :only-child) .story h3 {
+  font-size: 20px;
+  line-height: 1.12;
+}
+.secondary-list:has(> :only-child) .story .story-copy p {font-size: 11px; line-height: 1.48;}
+/* Two secondary cards: more compact image sizes. */
+.secondary-list:not(:has(> :only-child)) .story-inner .story-photo img {
+  max-height: 1.05in;
+}
+.secondary-list:not(:has(> :only-child)) .story h3 {font-size: 19px; line-height: 1.12;}
+/* Third-page cards: protect space for final banner. */
+.third-stories {align-content: start; flex: 0 0 auto;}
+.third-stories .story h3 {font-size: 19px; line-height: 1.13;}
+.third-stories .story-inner .story-photo img {max-height: 1.18in;}
+.third-stories .story p {font-size: 11px; line-height: 1.43;}
+/* Keep the closing box after article flow; don't let content overlap it. */
+.page-two .closing, .page-three .closing {flex-shrink: 0;}
+@media print {
+  .secondary-list .story, .third-stories .story {break-inside: avoid;}
+}
+
+/* INCLUDE-ALL editorial layout: page three can use tighter cards when needed. */
+.page-three .third-stories.item-count-4 .story,
+.page-three .third-stories.item-count-5 .story,
+.page-three .third-stories.item-count-6 .story {padding: .14in .17in .12in;}
+.page-three .third-stories.item-count-4 .story h3,
+.page-three .third-stories.item-count-5 .story h3,
+.page-three .third-stories.item-count-6 .story h3 {font-size: 16px; line-height: 1.12;}
+.page-three .third-stories.item-count-4 .story p,
+.page-three .third-stories.item-count-5 .story p,
+.page-three .third-stories.item-count-6 .story p {font-size: 10px; line-height: 1.35;}
+.page-three .third-stories.item-count-4 .story-photo img,
+.page-three .third-stories.item-count-5 .story-photo img,
+.page-three .third-stories.item-count-6 .story-photo img {max-height: .88in;}
+.page-three .third-stories.item-count-5,
+.page-three .third-stories.item-count-6 {gap: .11in; margin-top: .20in;}
+/* On very full issues show warning instead of hiding clipped stories. */
+#layout-warning {position: fixed; top: 8px; left: 50%; transform: translateX(-50%); z-index: 999;}
+@media print { #layout-warning {display:none !important;} }
+
+/* ============================================================
+   KELP KORNER EDITORIAL FINISHING — 2026
+   Preserve cover photo; introduce Smith Lab logo on every page.
+   ============================================================ */
+.cover-lab-logo {
+  position: absolute;
+  left: .58in;
+  bottom: .65in;
+  width: 1.6in;
+  height: .78in;
+  display: flex;
+  align-items: center;
+}
+.cover-lab-logo img {width:100%;height:100%;object-fit:contain;object-position:left bottom;mix-blend-mode:multiply;}
+.header-lab-logo { width: 1.68in; height: .90in; display:flex; align-items:flex-start; justify-content:flex-end; }
+.header-lab-logo img {width:100%; height:100%;object-fit:contain;object-position:right top;mix-blend-mode:multiply;}
+.feature-photo figcaption, .story-photo figcaption {font-size:8px;line-height:1.4;color:#426c62;}
+.secondary-list .story h3 {font-size:18px;line-height:1.14;letter-spacing:-.32px;margin-bottom:10px;}
+.secondary-list .story-inner .story-photo {margin-bottom:12px;}
+.secondary-list .story .story-copy p {line-height:1.45;}
+.third-stories .story h3 {font-size:18px;line-height:1.14;}
+.issue-menu div {padding:9px 0;}
+/* Final content page: the closing panel is anchored above the footer.
+   If cards extend into it, the browser flags the overlap instead of
+   letting the footer and closing jump to a fourth printed page. */
+.page-three .closing {
+  position: absolute;
+  left: .58in;
+  right: .58in;
+  bottom: .79in;
+  margin: 0;
+}
+.page-three .third-stories {max-height: 6.20in;}
+
+/* ============================================================
+   FINAL EDITORIAL REFINEMENTS — November 2026
+   ============================================================ */
+/* Tuck the Smith Lab mark neatly above the running footer. */
+.cover-lab-logo {
+  left: .58in; bottom: .57in; width: 1.43in; height: .65in;
+}
+/* Give the featured photo slightly more prominence when there
+   are only one or two stories, without changing its aspect ratio. */
+.feature-block.story-count-2 .feature-photo img { max-height: 3.12in; }
+.feature-block.story-count-2 { padding-bottom: .18in; }
+/* Protect breathing room between secondary media and headlines. */
+.secondary-list .story-photo figcaption { margin-top: 5px; }
+.secondary-list .story-copy h3 { margin-top: 1px; }

@@ -1,0 +1,21 @@
+KELP KORNER — QUARTERLY COVER PHOTO UPDATE
+
+This package changes only R/build_two_page.R. It does not alter the Google Drive folder structure, website, or HTML/CSS styles.
+
+For each newsletter quarter, place exactly one image in:
+  Newsletter/media/2026_Q4/cover_photo.jpg
+  Newsletter/media/2027_Q1/cover_photo.jpg
+  ...
+
+Supported filenames: cover_photo.jpg, cover_photo.jpeg, cover_photo.png, cover_photo.webp.
+Use exactly one of these in each quarter folder. Name is case-insensitive. JPG is easiest.
+
+Installation: unzip into the existing nerg_newsletter repo (copy the R/ folder contents, not the outer package directory).
+
+Run in RStudio:
+  Sys.setenv(NEWSLETTER_QUARTER = "2026-Q4")
+  source("R/create_newsletter.R")
+
+The new code downloads the cover for the selected quarter, converts PNG/WebP to JPEG if the magick package is installed, and saves it as drafts/<quarter>/two_page/kelp-forest.jpg for the existing CSS. No AI changes and no publishing.
+
+If a cover is missing or duplicates are found, it stops with an informative error to prevent showing an incorrect quarter's image. For PNG/WebP conversion, install.packages("magick") if needed.

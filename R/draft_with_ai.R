@@ -85,36 +85,24 @@ eligible <- updates[
   drop = FALSE
 ]
 
-# Require sufficient information to generate useful prose
-has_details <- !is.na(eligible$details) &
-  nchar(trimws(eligible$details)) >= 40
-
-incomplete <- eligible[
-  !has_details,
-  ,
-  drop = FALSE
-]
-
-eligible <- eligible[
-  has_details,
-  ,
-  drop = FALSE
-]
-
-cat("\nApproved entries with details:", nrow(eligible), "\n")
-cat(
-  "Approved entries needing more details:",
-  nrow(incomplete),
-  "\n"
-)
-
-if (nrow(eligible) == 0) {
+# Every approved row is required. Missing headline/details cause a clear error,
+# not silent removal from the issue.
+missing_headline <- is.na(eligible$headline) | !nzchar(trimws(eligible$headline))
+missing_details <- is.na(eligible$details) | !nzchar(trimws(eligible$details))
+if (any(missing_headline | missing_details)) {
+  bad_rows <- which(missing_headline | missing_details)
   stop(
-    "No approved updates have enough details to draft. ",
-    "Add factual notes to the Google Sheet first."
+    "Approved Google Sheet rows need both a headline and factual details: ",
+    paste(bad_rows, collapse = ", "),
+    ". Add notes or change Approved for AI to No. Nothing was omitted."
   )
 }
-
+if (!nrow(eligible)) stop("No updates marked Approved for AI = Yes for ", quarter)
+if (anyDuplicated(eligible$headline)) {
+  stop("Approved headlines must be unique for photo matching. Edit duplicate headlines.")
+}
+incomplete <- eligible[FALSE, , drop = FALSE]
+cat("\nApproved updates that MUST appear:", nrow(eligible), "\n")
 
 # ------------------------------------------------------------
 # 4. Prepare records for AI
@@ -192,7 +180,7 @@ chat <- ellmer::chat_openai(
     "",
     "FORMAT:",
     "Return structured newsletter stories.",
-    "The content must fit a two-page newsletter.",
+    "Target one cover and no more than two content pages.",
     "Do not introduce contextual claims simply to make",
     "the writing more engaging or complete.",
     "Every factual statement in the body must be",
@@ -225,8 +213,8 @@ story_schema <- ellmer::type_array(
     body = ellmer::type_string(
       paste(
         "Publication-ready newsletter prose only.",
-        "First story maximum 330 characters;",
-        "subsequent stories maximum 230 characters.",
+        "First story maximum 300 characters;",
+        "other stories maximum 210 characters.",
         "No editorial comments or missing-data notes."
       )
     ),
@@ -247,11 +235,11 @@ story_schema <- ellmer::type_array(
   ),
   
   description = paste(
-    "Select up to three distinct, newsworthy updates.",
-    "Use exact source_id values.",
-    "Order the strongest story first.",
-    "Do not invent facts to fill space.",
-    "Return fewer stories if insufficient material."
+    "Return EXACTLY one story for EVERY supplied record.",
+    "Use each exact source_id once, without omissions or additions.",
+    "Order the strongest story first while covering all records.",
+    "Shorten writing, not the number of stories.",
+    "Do not invent facts to fill space."
   )
   
 )
@@ -266,8 +254,8 @@ prompt <- paste0(
   quarter,
   ".\n\n",
   
-  "Choose up to three substantive updates from ",
-  "the approved records below.\n",
+  "Include EVERY approved update below exactly once. ",
+  "No ranking, omission, deletion or merger of records.\n",
   
   "Write engaging, concise science communication ",
   "using only supplied factual details.\n",
@@ -280,8 +268,9 @@ prompt <- paste0(
   "Place those comments exclusively in review_notes.\n",
   
   "The first story should be no longer than ",
-  "330 characters; each later story no longer ",
-  "than 230 characters.\n\n",
+  "300 characters; each later story no longer ",
+  "than 210 characters. If many stories are supplied, ",
+  "use especially concise prose.\n\n",
   
   "SOURCE RECORDS:\n",
   source_json
@@ -297,25 +286,22 @@ ai_stories <- chat$chat_structured(
 
 ai_stories <- as.data.frame(ai_stories)
 
-if (nrow(ai_stories) == 0) {
-  stop("AI returned no stories.")
+# Fail closed: never allow AI to silently choose a subset.
+expected_ids <- eligible$source_id
+returned_ids <- as.character(ai_stories$source_id)
+if (anyNA(returned_ids) || anyDuplicated(returned_ids) ||
+    length(returned_ids) != length(expected_ids) ||
+    !setequal(returned_ids, expected_ids)) {
+  missing_ids <- setdiff(expected_ids, returned_ids)
+  extra_ids <- setdiff(returned_ids, expected_ids)
+  stop("AI did not return every approved update. Missing: ",
+       paste(missing_ids, collapse = ", "),
+       "; unexpected: ", paste(extra_ids, collapse = ", "),
+       ". No incomplete draft will be used.")
 }
-
-
-# ------------------------------------------------------------
-# 8. Validate output and retain sources
-# ------------------------------------------------------------
-
-if (nrow(ai_stories) > 3) {
-  stop("AI returned more than three stories.")
-}
-
-if (anyDuplicated(ai_stories$source_id)) {
-  stop("AI returned duplicate source IDs.")
-}
-
-if (!all(ai_stories$source_id %in% eligible$source_id)) {
-  stop("AI returned an unknown source ID.")
+if (anyNA(ai_stories$title) || any(!nzchar(trimws(ai_stories$title))) ||
+    anyNA(ai_stories$body) || any(!nzchar(trimws(ai_stories$body)))) {
+  stop("AI returned an empty title/body. No incomplete draft will be used.")
 }
 
 source_index <- match(
@@ -326,16 +312,57 @@ source_index <- match(
 ai_stories$original_headline <- eligible$headline[source_index]
 ai_stories$original_details <- eligible$details[source_index]
 
-max_body <- c(
-  330,
-  rep(230, max(0, nrow(ai_stories) - 1))
-)
+max_body <- c(300L, rep(210L, max(0L, nrow(ai_stories) - 1L)))
 
 ai_stories$length_warning <- (
   nchar(ai_stories$body) > max_body |
     nchar(ai_stories$title) > 74
 )
+if (any(ai_stories$length_warning)) {
+  warning("AI text exceeds target lengths. Browser overflow check is required.", call. = FALSE)
+}
 
+
+# ------------------------------------------------------------
+# 8b. Issue-level editorial text for the cover and final page
+# ------------------------------------------------------------
+# An extra small structured call generates the introductory note and
+# looking-ahead text. Only facts in approved rows may be used.
+issue_schema <- ellmer::type_object(
+  introduction = ellmer::type_string(
+    "One or two concise, reader-facing sentences summarizing this quarter. No invented facts. 230 characters maximum."),
+  looking_ahead = ellmer::type_string(
+    "Specific, source-supported future activities only. If none stated, return an empty string. 170 characters maximum."),
+  editorial_notes = ellmer::type_string(
+    "Briefly flag anything unclear or unsupported for the human editor.")
+)
+issue_prompt <- paste0(
+  "Write two short editorial components for Kelp Korner ", quarter, ".\n",
+  "Use ONLY the supplied approved records. Do not invent future plans.\n",
+  "Introduction: write a coherent editorial lead that connects the quarter's main themes ",
+  "when the sources support a connection. Prefer an engaging synthesis over a list ",
+  "of names or story titles. Use one or two brief natural sentences, up to 230 characters. ",
+  "Do not manufacture a shared theme, causal relationship, or broader claim. ",
+  "When the updates are unrelated, give a concise factual overview instead. ",
+  "No generic welcome.\n",
+  "Looking ahead: only mention explicit planned or upcoming work; otherwise return an empty string.\n",
+  "No markdown, titles, credits or source-discussion in introduction/looking_ahead.\n",
+  "RECORDS:\n", source_json
+)
+issue_editorial <- chat$chat_structured(issue_prompt, type = issue_schema, echo = "none")
+intro_text <- trimws(as.character(issue_editorial$introduction))
+closing_text <- trimws(as.character(issue_editorial$looking_ahead))
+if (!nzchar(intro_text) || nchar(intro_text) > 230L) {
+  warning("AI introduction is missing or too long; using a safe fallback.", call. = FALSE)
+  intro_text <- paste("Research, fieldwork, and lab updates from", quarter, "at the Nearshore Ecology Research Group.")
+}
+if (nchar(closing_text) > 170L) {
+  warning("AI looking-ahead text exceeds 170 characters; using standard closing.", call. = FALSE)
+  closing_text <- ""
+}
+if (!nzchar(closing_text)) {
+  closing_text <- "More field notes, more voices, and more discoveries—one quarter at a time."
+}
 
 # ------------------------------------------------------------
 # 9. Save local editorial drafts
@@ -383,6 +410,15 @@ write.csv(
   na = ""
 )
 
+# The layout reads this sidecar automatically from the exact AI draft path.
+issue_path <- sub("\\.csv$", "_issue.json", csv_path)
+jsonlite::write_json(
+  list(introduction = intro_text, looking_ahead = closing_text,
+       editorial_notes = as.character(issue_editorial$editorial_notes)),
+  issue_path, auto_unbox = TRUE, pretty = TRUE
+)
+
+
 
 # ------------------------------------------------------------
 # 10. Create human-readable review document
@@ -394,6 +430,16 @@ md <- c(
   "**AI EDITORIAL DRAFT — NOT APPROVED FOR PUBLICATION**",
   "",
   "Review every claim against the original lab notes.",
+  "",
+  "## Issue introduction",
+  "",
+  intro_text,
+  "",
+  "## Looking ahead",
+  "",
+  closing_text,
+  "",
+  paste0("**Editorial notes:** ", as.character(issue_editorial$editorial_notes)),
   ""
 )
 
