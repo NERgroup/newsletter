@@ -8,3 +8,5 @@ _site/
 _freeze/
 drafts/
 .DS_Store
+
+/.quarto/

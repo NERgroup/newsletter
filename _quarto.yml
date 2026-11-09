@@ -3,7 +3,7 @@ project:
   output-dir: _site
 
 website:
-  title: "From the Kelp Forest"
+  title: "Kelp Korner"
   site-url: https://nergroup.github.io/newsletter/
   description: "Quarterly updates from the Nearshore Ecology Research Group at UC Santa Cruz."
   navbar:
