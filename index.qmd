@@ -1,0 +1,13 @@
+---
+title: "From the Kelp Forest"
+subtitle: "Quarterly news from the Nearshore Ecology Research Group"
+listing:
+  contents: "posts/*/index.qmd"
+  type: default
+  sort: "date desc"
+  feed: true
+---
+
+Research updates, field notes, student highlights, and news from the Nearshore Ecology Research Group at UC Santa Cruz.
+
+Our first issue is in preparation. Subscribe or visit again for new updates.

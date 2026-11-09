@@ -1,0 +1,23 @@
+# After reviewing the drafts, publish explicitly:
+# Sys.setenv(NEWSLETTER_QUARTER="2026-Q4")
+# source("R/publish_issue.R")
+if (!file.exists("_quarto.yml")) stop("Run this from the repository root.")
+quarter <- Sys.getenv("NEWSLETTER_QUARTER", unset = "")
+if (!grepl("^[0-9]{4}-Q[1-4]$", quarter)) stop("Set NEWSLETTER_QUARTER, e.g. '2026-Q4'.")
+src <- file.path("drafts", quarter, "index.qmd")
+dest_dir <- file.path("posts", quarter)
+dest <- file.path(dest_dir, "index.qmd")
+if (!file.exists(src)) stop("No draft at ", src)
+if (file.exists(dest)) stop("Published issue already exists: ", dest, ". Edit it directly if necessary.")
+content <- readLines(src, warn = FALSE)
+if (any(grepl("\\[VERIFY:", content))) stop("Resolve all [VERIFY: ...] flags before publishing.")
+if (!interactive()) stop("Publishing requires interactive RStudio approval.")
+cat("You are about to make ", quarter, " PUBLIC via GitHub after git push.\n",
+    "Confirm facts, permissions, photos, and publication readiness first.\n", sep = "")
+answer <- readline("Type PUBLISH to copy the approved issue into posts/: ")
+if (!identical(answer, "PUBLISH")) stop("Publication cancelled.")
+content <- sub("^draft: true$", "draft: false", content)
+dir.create(dest_dir, recursive = TRUE, showWarnings = FALSE)
+writeLines(content, dest)
+message("Prepared ", dest, " for publication. Commit and push to main to deploy.\n",
+        "Email draft remains local and must be sent separately after review.")

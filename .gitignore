@@ -1,0 +1,10 @@
+.Rproj.user/
+.Rhistory
+.RData
+.Renviron
+.env
+.quarto/
+_site/
+_freeze/
+drafts/
+.DS_Store

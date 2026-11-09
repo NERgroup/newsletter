@@ -1,0 +1,7 @@
+:root { --lab-sea: #176b60; }
+.navbar { border-bottom: 3px solid var(--lab-sea); }
+h1, h2 { letter-spacing: -.025em; }
+h1 { font-weight: 750; }
+a { text-underline-offset: 3px; }
+.quarto-title-block .subtitle { color: #49655d; }
+main.content { max-width: 860px; }

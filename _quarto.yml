@@ -1,0 +1,29 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "From the Kelp Forest"
+  site-url: https://nergroup.github.io/newsletter/
+  description: "Quarterly updates from the Nearshore Ecology Research Group at UC Santa Cruz."
+  navbar:
+    left:
+      - href: index.qmd
+        text: Issues
+      - href: about.qmd
+        text: About
+    right:
+      - href: https://smithlab.ucsc.edu
+        text: Lab website
+  page-footer:
+    center: "Nearshore Ecology Research Group · UC Santa Cruz"
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: false
+    link-external-newwindow: true
+
+execute:
+  freeze: auto
