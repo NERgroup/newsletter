@@ -1,6 +1,6 @@
 ---
-title: "From the Kelp Forest"
-subtitle: "Quarterly news from the Nearshore Ecology Research Group"
+title: "Kelp Korner"
+title-block-banner: false
 listing:
   contents: "posts/*/index.qmd"
   type: default
@@ -8,6 +8,25 @@ listing:
   feed: true
 ---
 
-Research updates, field notes, student highlights, and news from the Nearshore Ecology Research Group at UC Santa Cruz.
+::: {.kk-hero}
+<div class="kk-hero-image" role="img" aria-label="Sunlight filtering through a giant kelp forest, with fish swimming between kelp fronds."></div>
+<div class="kk-hero-content">
+  <div class="kk-eyebrow">NEARSHORE ECOLOGY RESEARCH GROUP · UC SANTA CRUZ</div>
+  <h1>Kelp Korner</h1>
+  <p>Stories from California's nearshore ecosystems</p>
+</div>
+:::
 
-Our first issue is in preparation. Subscribe or visit again for new updates.
+::: {.kk-intro}
+**Research updates, field notes, and the people behind the science.**
+
+Kelp Korner is the quarterly newsletter of the Nearshore Ecology Research Group at UC Santa Cruz. Explore new discoveries, follow fieldwork along California's coast, and get to know the researchers and students doing the work.
+:::
+
+## Latest issues
+
+Our first issue is in preparation. New quarterly editions will appear below as they're published.
+
+::: {.kk-bottom-link}
+Learn more about our research and team at the [NERG lab website](https://smithlab.ucsc.edu).
+:::

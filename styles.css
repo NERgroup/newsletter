@@ -1,7 +1,35 @@
-:root { --lab-sea: #176b60; }
-.navbar { border-bottom: 3px solid var(--lab-sea); }
-h1, h2 { letter-spacing: -.025em; }
-h1 { font-weight: 750; }
+/* Kelp Korner — photography-led, clean editorial design */
+:root {
+  --kk-deep: #123e38;
+  --kk-teal: #197669;
+  --kk-ink: #243732;
+  --kk-muted: #526b65;
+}
+.navbar { border-bottom: 3px solid var(--kk-deep); }
+.navbar-brand { font-weight: 700; letter-spacing: -0.025em; }
 a { text-underline-offset: 3px; }
-.quarto-title-block .subtitle { color: #49655d; }
-main.content { max-width: 860px; }
+a:hover { color: var(--kk-teal); }
+main.content { max-width: 1080px; }
+h1, h2 { letter-spacing: -0.025em; }
+h2 { font-weight: 700; color: var(--kk-deep); }
+
+/* Homepage: the photo remains a real, unchanged image; CSS crops its display only. */
+body:has(.kk-hero) main.content > header#title-block-header { display: none; }
+.kk-hero { position: relative; overflow: hidden; border-radius: 5px; min-height: 445px; background: var(--kk-deep); display: flex; align-items: flex-end; margin: 0 0 2.4rem 0; }
+.kk-hero-image { position: absolute; inset: 0; background-image: linear-gradient(180deg,rgba(0,0,0,0.05) 20%,rgba(0,24,23,0.76) 100%), url('images/branding/kelp-forest.jpg'); background-position: center 47%; background-size: cover; }
+.kk-hero-content { position: relative; z-index: 1; padding: clamp(25px,5vw,58px); color: white; width: 100%; }
+.kk-hero-content h1 { font-size: clamp(3.25rem,7vw,5.7rem); font-weight: 760; letter-spacing: -.055em; color: white; margin: .35rem 0 .2rem; line-height: 1.05; }
+.kk-hero-content p { font-size: clamp(1.1rem,2.5vw,1.5rem); color: #f0f8f4; margin: .5rem 0 0; }
+.kk-eyebrow { font-weight: 700; font-size: .75rem; letter-spacing: .13em; color: #f6f6ed; }
+.kk-intro { max-width: 760px; font-size: 1.1rem; line-height: 1.72; color: var(--kk-ink); margin: 0 0 3rem; }
+.kk-intro strong { color: var(--kk-deep); }
+.kk-bottom-link { margin-top: 2.4rem; padding: 1.1rem 1.3rem; background: #f1f6f3; border-left: 3px solid var(--kk-teal); }
+.quarto-listing { margin-top: 1.6rem; }
+
+@media (max-width: 650px) {
+  .kk-hero { min-height: 435px; }
+  .kk-hero-image { background-position: center 45%; }
+  .kk-hero-content { padding: 28px; }
+  .kk-eyebrow { font-size: .65rem; }
+  .kk-intro { font-size: 1rem; }
+}
