@@ -1,96 +1,37 @@
-# From the Kelp Forest — newsletter workflow
+# Kelp Korner: two-page RStudio newsletter design
 
-Quarterly newsletter starter for the Nearshore Ecology Research Group (NERG), UC Santa Cruz.
+This is an **add-on** to the existing `NERgroup/newsletter` repo, not a replacement. It preserves the Quarto website, GitHub workflow, `data/updates.csv`, and `R/build_newsletter.R`.
 
-**Two outputs:** a public Quarto website/archive and a separate email draft (Markdown + HTML). AI drafts are **never** committed automatically or sent.
+## Installation (from Mac Terminal)
 
-## 1. Open the repo in RStudio
+Unzip into your existing repository folder, e.g.:
 
-1. Install [Quarto](https://quarto.org/docs/get-started/), R, RStudio, and Git.
-2. Clone: `git clone https://github.com/NERgroup/newsletter.git` (once these starter files have been added to the repository).
-3. Open the repository folder as an RStudio Project (File > New Project > Existing Directory), or run RStudio from this directory.
-4. In the R Console: `install.packages(c("ellmer", "jsonlite", "commonmark"))`.
-
-## 2. Configure the AI key locally
-
-Use `usethis::edit_r_environ()` or edit your user-level `~/.Renviron` and add:
-
-```text
-OPENAI_API_KEY=your_api_key_here
-OPENAI_MODEL=gpt-5.6-luna
+```bash
+cd /Users/jossmith/code_respositories/nerg_newsletter
+unzip -o ~/Downloads/kelp-korner-r-workflow.zip
 ```
 
-Restart RStudio. The key must never be checked into Git. OpenAI API access is billed separately from ChatGPT subscriptions. Change `OPENAI_MODEL` to any model available on your API account.
+The archive adds `R/build_two_page.R`, `templates/two_page/issue.html`, `templates/two_page/issue.css`, and `images/branding/kelp-forest.jpg`.
 
-## 3. Maintain the updates log
-
-Edit `data/updates.csv` (or import equivalent rows from a Google Form/Sheet later). Columns:
-
-| column | example | meaning |
-| --- | --- | --- |
-| date | `2026-10-12` | date of activity |
-| category | `Fieldwork` | section candidate |
-| headline | `Kelp surveys continue` | working headline |
-| details | `Description of work and confirmed facts` | factual source notes |
-| source_url | `https://...` | optional verification URL |
-| approved_for_ai | `TRUE` | explicit permission to send this record to the configured AI provider |
-
-Only approved records in the selected quarter are sent to the model. Keep personal information and confidential research out of this log. **AI permission is not publication permission.**
-
-## 4. Draft a newsletter
-
-In the **R Console** from the repository root:
+## Generate preview (in RStudio Console)
 
 ```r
 Sys.setenv(NEWSLETTER_QUARTER = "2026-Q4")
-source("R/build_newsletter.R")
+source("R/build_two_page.R")
 ```
 
-Omit `Sys.setenv(...)` to draft for the most recently *completed* calendar quarter.
+It opens `drafts/2026-Q4/two_page/index.html` in your browser. On the browser's Print dialog choose **Save as PDF**, **Letter**, **No margins**, **Print backgrounds** (and disable headers/footers). The CSS uses exactly two Letter-sized pages. If updates are long, the script limits text length to protect the layout; review the final preview for truncation.
 
-Draft files appear at `drafts/2026-Q4/`:
+When `data/updates.csv` contains approved records in that quarter, the template uses the three most recent approved records for its three stories. If there are none, a distinctly labeled layout preview is used. This preview does **not** invoke OpenAI or incur API costs, and it does **not** automatically publish or send anything. `drafts/` is already Git-ignored.
 
-- `index.qmd` — Quarto website article with `draft: true`
-- `email.md` — email text for editing
-- `email.html` — email-client-friendly HTML to import into a mailing platform
-- `sources.json` — exact source records provided to AI
+## Existing AI workflow
 
-`drafts/` is Git-ignored. Review all claims, especially unpublished research, grants, publication status, attributions, and links. The script does not perform an independent fact check.
+`R/build_newsletter.R` remains the AI-assisted long-form Quarto newsletter and email drafting script. The two-page design is an additional, spreadsheet-driven **print/PDF layout** alongside it. Connecting AI-edited story summaries directly into this print layout is a future integration, not yet implemented.
 
-## 5. Preview and publish
+## Images
 
-To preview the existing public site, run **in the Terminal**:
+Your uploaded real kelp forest photo is the cover. Do not use generated imagery; replace `images/branding/kelp-forest.jpg` with your own licensed photograph if desired. Add photo credit before sharing. The layout deliberately avoids pretending other photographs exist.
 
-```sh
-quarto preview
-```
+## Publishing
 
-After reviewing the AI draft, in the **R Console**:
-
-```r
-Sys.setenv(NEWSLETTER_QUARTER = "2026-Q4")
-source("R/publish_issue.R")
-```
-
-Type `PUBLISH` when asked. This copies the approved draft to `posts/2026-Q4/index.qmd`. Then from the Terminal:
-
-```sh
-quarto render
-git add .
-git commit -m "Publish quarterly newsletter"
-git push origin main
-```
-
-**Important:** `git add .` stages all non-ignored material. Review with `git status` before committing, especially the CSV data log. Do not commit sensitive information. Email delivery is manual: import the reviewed `drafts/2026-Q4/email.html` into an approved mailing service, test, then send. There is no automatic emailing.
-
-## 6. Configure GitHub Pages once
-
-In GitHub repository **Settings > Pages**, set **Build and deployment > Source = GitHub Actions**. On every push to `main`, `.github/workflows/publish.yml` will render and deploy the Quarto site. The intended default URL is https://nergroup.github.io/newsletter/ once Pages is enabled and the first deployment succeeds.
-
-If GitHub reports a permissions or Pages environment issue, consult [GitHub Pages via Quarto](https://quarto.org/docs/publishing/github-pages.html). This workflow uses GitHub's first-party Pages deployment actions and does not require `quarto publish` locally.
-
-## Roadmap
-
-**MVP (included):** curated update log → AI newsletter draft → editorial review → Quarto website + email HTML.
-
-**Later:** Google Form/Sheet intake, publication DOI fetching, authenticated GitHub activity summaries, approved photo collection, a source-review dashboard, mailing-platform API integration, and scheduled draft reminders. These integrations are **not** enabled yet.
+Review and publish only factual, approved stories. This preview is a local HTML/PDF layout and does not appear on the public Quarto website unless you explicitly upload or link it later.
