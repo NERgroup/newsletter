@@ -18,7 +18,7 @@ if (anyDuplicated(names(updates))) stop("Duplicate column names after normalizat
 required <- c("quarter", "headline", "category", "details", "approved_for_ai")
 missing <- setdiff(required, names(updates))
 if (length(missing)) stop("Missing required columns: ", paste(missing, collapse = ", "))
-for (nm in c("date", "submitted_by", "photo_link", "photo_credit", "photo_caption", "source_link", "editorial_notes")) {
+for (nm in c("date", "submitted_by", "photo_link", "photo_credit", "photo_caption", "source_link", "link_text", "editorial_notes")) {
   if (!nm %in% names(updates)) updates[[nm]] <- rep(NA_character_, nrow(updates))
 }
 message("Imported ", nrow(updates), " Google Sheet updates (with optional photo_caption).")

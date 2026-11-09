@@ -345,7 +345,10 @@ issue_prompt <- paste0(
   "Do not manufacture a shared theme, causal relationship, or broader claim. ",
   "When the updates are unrelated, give a concise factual overview instead. ",
   "No generic welcome.\n",
-  "Looking ahead: only mention explicit planned or upcoming work; otherwise return an empty string.\n",
+  "Looking ahead: only mention explicit, distinct planned or upcoming work. ",
+  "Do not repeat the same field activity already reported as a main story ",
+  "unless the notes explicitly describe a separate future milestone. ",
+  "If nothing distinct is documented, return an empty string.\n",
   "No markdown, titles, credits or source-discussion in introduction/looking_ahead.\n",
   "RECORDS:\n", source_json
 )

@@ -730,3 +730,22 @@ h1 {
 /* Protect breathing room between secondary media and headlines. */
 .secondary-list .story-photo figcaption { margin-top: 5px; }
 .secondary-list .story-copy h3 { margin-top: 1px; }
+
+/* External resources supplied by the lab: print-safe and clickable in HTML/PDF. */
+.story-link {
+  display: inline-flex;
+  align-items: baseline;
+  align-self: flex-start;
+  max-width: 100%;
+  margin-top: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #176f63;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+.feature-main .story-link { margin-top: 12px; font-size: 11px; }
+.story-copy .story-link { margin-top: 9px; }
+.story-link:focus-visible { outline: 2px solid #176f63; outline-offset: 3px; }

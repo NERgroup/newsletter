@@ -250,10 +250,50 @@ for (i in seq_len(story_count)) {
   }
 }
 
+# Links are editorial metadata from the original approved Google Sheet row.
+# Never ask AI to invent or rewrite a link destination.
+# Optional Link text defaults to "Read more".
+if (!"source_link" %in% names(sheet)) sheet$source_link <- NA_character_
+if (!"link_text" %in% names(sheet)) sheet$link_text <- NA_character_
+
+story_links <- rep("", story_count)
+link_manifest <- data.frame(
+  story = seq_len(story_count),
+  source_headline = as.character(stories$original_headline),
+  source_url = rep(NA_character_, story_count),
+  display_text = rep(NA_character_, story_count),
+  stringsAsFactors = FALSE
+)
+
+for (i in seq_len(story_count)) {
+  url <- sheet$source_link[idx[i]]
+  if (is.na(url) || !nzchar(trimws(url))) next
+  url <- trimws(url)
+  # Reject unsafe / malformed URLs rather than silently inserting them.
+  if (!grepl("^https?://[^[:space:]<>\"']+$", url, perl = TRUE)) {
+    stop("Invalid Source link for story ", i, " (", stories$original_headline[i],
+         "). Use a complete http:// or https:// URL without spaces.")
+  }
+  label <- sheet$link_text[idx[i]]
+  if (is.na(label) || !nzchar(trimws(label))) label <- "Read more"
+  label <- trimws(label)
+  if (nchar(label) > 90L) {
+    stop("Link text exceeds 90 characters for: ", stories$original_headline[i])
+  }
+  story_links[i] <- paste0(
+    '<a class="story-link" href="', esc(url),
+    '" target="_blank" rel="noopener noreferrer">',
+    esc(label), '<span aria-hidden="true"> ↗</span></a>'
+  )
+  link_manifest$source_url[i] <- url
+  link_manifest$display_text[i] <- label
+}
+
 feature_media <- photo_html[1]
 message("Downloaded linked photos for ", sum(nzchar(photo_html)), " of ", story_count,
         " selected stories.")
 write.csv(photo_manifest, file.path(out_dir, "photo_manifest.csv"), row.names = FALSE, na = "")
+write.csv(link_manifest, file.path(out_dir, "link_manifest.csv"), row.names = FALSE, na = "")
 
 # Every story is included. Up to three stories: two pages total.
 # Four or more: page 2 has the feature plus up to two cards;
@@ -276,6 +316,7 @@ render_card <- function(i) {
     '<h3>', s[[i]]$title, '</h3>',
     '<p>', s[[i]]$body, '</p>',
     '<p class="note">', s[[i]]$category, '</p>',
+    story_links[i],
     '</div></div></article>'
   )
 }
@@ -352,6 +393,7 @@ replacements <- c(
   STORY1_TITLE = s[[1]]$title,
   STORY1_BODY = s[[1]]$body,
   STORY1_CATEGORY = s[[1]]$category,
+  STORY1_LINK = story_links[1],
   SECONDARY_STORIES = secondary,
   EXTRA_PAGE = extra_page,
   TOTAL_PAGES = sprintf("%02d", page_count),
@@ -378,6 +420,7 @@ report <- data.frame(
   photo_linked = nzchar(photo_html),
   photo_credit_present = !is.na(sheet$photo_credit[idx]) & nzchar(trimws(sheet$photo_credit[idx])),
   photo_caption_present = !is.na(sheet$photo_caption[idx]) & nzchar(trimws(sheet$photo_caption[idx])),
+  source_link_present = nzchar(story_links),
   stringsAsFactors = FALSE
 )
 write.csv(report, file.path(out_dir, "inclusion_report.csv"), row.names = FALSE)
