@@ -25,6 +25,17 @@ year <- as.integer(substr(quarter, 1, 4))
 q <- as.integer(substr(quarter, 7, 7))
 season_label <- paste(c("Winter", "Spring", "Summer", "Fall")[q], year)
 
+# Publication convention: inaugural Fall 2026 = Vol. 01, Issue 01.
+# Each subsequent calendar year is a new volume, with issues 01-04.
+if (year < 2026L || (year == 2026L && q != 4L)) {
+  stop("Kelp Korner publication numbering begins with 2026-Q4.")
+}
+volume_number <- year - 2026L + 1L
+issue_number <- if (year == 2026L) 1L else q
+volume_label <- sprintf("VOL. %02d", volume_number)
+issue_label <- sprintf("ISSUE %02d", issue_number)
+
+
 # Import the current Google Sheet to match APPROVED stories to real photos.
 source("R/read_google_sheets.R")
 needed <- c("quarter", "headline", "details", "photo_link", "photo_credit", "approved_for_ai")
@@ -331,7 +342,8 @@ menu <- if (story_count <= 5L) {
 replacements <- c(
   ISSUE_TITLE = paste("Kelp Korner |", season_label),
   SEASON = toupper(season_label),
-  ISSUE_STATUS = "AI EDITORIAL DRAFT — REVIEW BEFORE SHARING",
+  VOLUME_LABEL = volume_label,
+  ISSUE_LABEL = issue_label,
   INTRO = intro,
   INTRO_HEADING = intro_heading,
   ISSUE_MENU = menu,

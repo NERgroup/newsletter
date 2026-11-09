@@ -1,25 +1,47 @@
-# Kelp Korner — final visual and editorial refinements
+# Kelp Korner — Cover copy and volume/issue numbering
 
-This patch is based on the existing November 9 logo-and-editorial workflow. It updates only:
+This update changes only **two files**. It preserves the existing Google Sheet / Drive media / OpenAI workflow, cover photograph, Smith Lab logo, CSS, and two-/three-page design.
 
-- `templates/two_page/issue.html` — removes duplicate standalone Follow the Research link below the closing panel. Keeps the styled clickable link within the panel.
-- `templates/two_page/issue.css` — slightly adjusts the cover logo placement and two-story featured image, and fine-tunes card spacing.
-- `R/draft_with_ai.R` — improves instructions for a connected, evidence-grounded quarterly introduction.
+## Install
 
-**Install from the project folder in RStudio Terminal:**
+In your RStudio **Terminal**:
 
 ```bash
 cd /Users/jossmith/code_respositories/nerg_newsletter
-unzip -o ~/Downloads/kelp-korner-final-refinements.zip
+unzip -o ~/Downloads/kelp-korner-cover-copy-numbering.zip
 ```
 
-**Test in the RStudio Console:**
+The ZIP replaces:
+
+- `R/build_two_page.R`
+- `templates/two_page/issue.html`
+
+## Cover wording
+
+- `THE QUARTERLY EDITION · FALL 2026`
+- `Research, people & stories / from California's nearshore.`
+- `VOL. 01 / ISSUE 01`
+
+The phrase `AI EDITORIAL DRAFT — REVIEW BEFORE SHARING` is removed from the **cover**. The generated newsletter is **still a private draft**, not a public release.
+
+## Automatic numbering
+
+- 2026-Q4 → Vol. 01 / Issue 01 (inaugural issue)
+- 2027-Q1 → Vol. 02 / Issue 01
+- 2027-Q2 → Vol. 02 / Issue 02
+- 2027-Q3 → Vol. 02 / Issue 03
+- 2027-Q4 → Vol. 02 / Issue 04
+- 2028-Q1 → Vol. 03 / Issue 01
+
+Pre-inaugural quarters are intentionally rejected to prevent accidental misnumbering.
+
+## Test
+
+In the RStudio **Console**:
 
 ```r
 Sys.setenv(NEWSLETTER_QUARTER = "2026-Q4")
 source("R/create_newsletter.R")
 ```
 
-The AI drafting step makes a new billable API call. Nothing is published. The template still draws the quarterly cover from Drive, includes all approved stories, and targets a maximum of three pages. Examine the browser warning and print-page count, especially after adding five or six stories. These edits do not guarantee the full issue will fit if there is too much content.
-
-No changes to Google Drive folder structure or source media. Keep your existing `R/build_two_page.R`, `R/create_newsletter.R`, and Google integration scripts.
+This regenerates the private preview and makes the usual AI API call. No publication occurs.
