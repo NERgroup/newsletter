@@ -146,9 +146,11 @@ chat <- ellmer::chat_openai(
     "the quarterly newsletter of the Nearshore",
     "Ecology Research Group at UC Santa Cruz.",
     "",
-    "Write engaging, accessible, scientifically",
-    "accurate prose for scientists, students,",
-    "collaborators, and supporters.",
+    "Write polished, scholarly science communication",
+    "for researchers, students, collaborators,",
+    "and interested supporters.",
+    "The prose should be intellectually serious,",
+    "precise, coherent, economical, and graceful.",
     "",
     "STRICT FACTUAL RULES:",
     "Use only facts explicitly supplied in the records.",
@@ -172,11 +174,17 @@ chat <- ellmer::chat_openai(
     "accurate story rather than adding speculation.",
     "",
     "STYLE:",
-    "Use natural, engaging science communication.",
-    "Avoid jargon when possible.",
-    "Prefer direct sentences and active voice.",
+    "Write with the precision and restraint of a scholarly editor,",
+    "not the formality of an academic paper or a promotional piece.",
+    "Use strong verbs, concrete language, and well-shaped sentences.",
+    "Make each sentence advance the story; remove filler, clichés,",
+    "generic enthusiasm, and repeated ideas.",
+    "Use field-specific terms when they improve precision, but avoid",
+    "unexplained jargon and needless complexity.",
+    "Preserve distinctions among research aims, methods, observations,",
+    "findings, interpretations, and planned work.",
     "Do not overstate the significance of research.",
-    "Keep the writing concise and informative.",
+    "Keep the writing concise without making it telegraphic.",
     "",
     "FORMAT:",
     "Return structured newsletter stories.",
@@ -207,12 +215,14 @@ story_schema <- ellmer::type_array(
     ),
     
     title = ellmer::type_string(
-      "Engaging, factual headline, 74 characters maximum."
+      "A precise, engaging, non-promotional headline; 74 characters maximum."
     ),
     
     body = ellmer::type_string(
       paste(
-        "Publication-ready newsletter prose only.",
+        "Polished, scholarly but readable newsletter prose only.",
+        "Use precise, well-crafted sentences and strong verbs.",
+        "Do not add interpretation or context absent from the records.",
         "First story maximum 300 characters;",
         "other stories maximum 210 characters.",
         "No editorial comments or missing-data notes."
@@ -257,8 +267,10 @@ prompt <- paste0(
   "Include EVERY approved update below exactly once. ",
   "No ranking, omission, deletion or merger of records.\n",
   
-  "Write engaging, concise science communication ",
-  "using only supplied factual details.\n",
+  "Write polished, scholarly but accessible newsletter prose ",
+  "using only supplied factual details. Favor precise language, ",
+  "strong verbs, coherent sentences, and an assured editorial voice; ",
+  "avoid hype, clichés, filler, and needless jargon.\n",
   
   "The body must read like finished newsletter text.\n",
   
@@ -339,9 +351,9 @@ issue_schema <- ellmer::type_object(
 issue_prompt <- paste0(
   "Write two short editorial components for Kelp Korner ", quarter, ".\n",
   "Use ONLY the supplied approved records. Do not invent future plans.\n",
-  "Introduction: write a coherent editorial lead that connects the quarter's main themes ",
-  "when the sources support a connection. Prefer an engaging synthesis over a list ",
-  "of names or story titles. Use one or two brief natural sentences, up to 230 characters. ",
+  "Introduction: write a polished, scholarly editorial lead that connects the quarter's main themes ",
+  "only when the sources support a connection. Prefer a concise, coherent synthesis over a list ",
+  "of names or story titles. Use precise, natural language in one or two sentences, up to 230 characters. ",
   "Do not manufacture a shared theme, causal relationship, or broader claim. ",
   "When the updates are unrelated, give a concise factual overview instead. ",
   "No generic welcome.\n",
