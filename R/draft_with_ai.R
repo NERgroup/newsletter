@@ -56,7 +56,7 @@ required_cols <- c(
   "headline",
   "category",
   "details",
-  "approved_for_ai"
+  "approved_for_publication"
 )
 
 missing_cols <- setdiff(
@@ -72,15 +72,15 @@ if (length(missing_cols) > 0) {
 }
 
 # Normalize approval values
-approved <- tolower(
-  trimws(as.character(updates$approved_for_ai))
+approved_for_publication <- tolower(
+  trimws(as.character(updates$approved_for_publication))
 ) %in% c("yes", "true", "1")
 
 # Select approved updates for the quarter
 eligible <- updates[
   !is.na(updates$quarter) &
     updates$quarter == quarter &
-    approved,
+    approved_for_publication,
   ,
   drop = FALSE
 ]
@@ -94,10 +94,10 @@ if (any(missing_headline | missing_details)) {
   stop(
     "Approved Google Sheet rows need both a headline and factual details: ",
     paste(bad_rows, collapse = ", "),
-    ". Add notes or change Approved for AI to No. Nothing was omitted."
+    ". Add notes or change Approved for publication to No. Nothing was omitted."
   )
 }
-if (!nrow(eligible)) stop("No updates marked Approved for AI = Yes for ", quarter)
+if (!nrow(eligible)) stop("No updates marked Approved for publication = Yes for ", quarter)
 if (anyDuplicated(eligible$headline)) {
   stop("Approved headlines must be unique for photo matching. Edit duplicate headlines.")
 }

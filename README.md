@@ -17,7 +17,7 @@ This updates `R/read_google_sheets.R`, `R/draft_with_ai.R`, `R/build_two_page.R`
 
 In the **Updates** tab, use the existing `Source link` column for an absolute `https://...` or `http://...` URL. In the new `Link text` column enter a short visible label such as **Read the UCSC press release**. Leave Link text blank to display **Read more**. Leave Source link blank to show no link.
 
-Only entries for the selected quarter with `Approved for AI = Yes` are included. Links are taken exactly from the source row, not written or changed by AI. They show on both featured and secondary cards. HTML and PDFs printed from Chrome should retain the clickable link targets, provided print-to-PDF preserves hyperlinks.
+Only entries for the selected quarter with `Approved for publication = Yes` are sent to AI drafting. The generated newsletter remains an editorial draft and must still be reviewed before distribution. Links are taken exactly from the source row, not written or changed by AI. They show on both featured and secondary cards. HTML and PDFs printed from Chrome should retain the clickable link targets, provided print-to-PDF preserves hyperlinks.
 
 ## Run
 

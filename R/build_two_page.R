@@ -38,11 +38,11 @@ issue_label <- sprintf("ISSUE %02d", issue_number)
 
 # Import the current Google Sheet to match APPROVED stories to real photos.
 source("R/read_google_sheets.R")
-needed <- c("quarter", "headline", "details", "photo_link", "photo_credit", "approved_for_ai")
+needed <- c("quarter", "headline", "details", "photo_link", "photo_credit", "approved_for_publication")
 missing <- setdiff(needed, names(updates))
 if (length(missing)) stop("Google Sheet missing columns: ", paste(missing, collapse = ", "))
 
-approved_flag <- tolower(trimws(as.character(updates$approved_for_ai))) %in% c("yes", "true", "1")
+approved_flag <- tolower(trimws(as.character(updates$approved_for_publication))) %in% c("yes", "true", "1")
 valid_quarter <- !is.na(updates$quarter) & trimws(updates$quarter) == quarter
 sheet <- updates[valid_quarter & approved_flag, , drop = FALSE]
 

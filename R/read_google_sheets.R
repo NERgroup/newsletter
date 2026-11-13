@@ -15,7 +15,7 @@ canonical <- function(x) {
 names(updates) <- vapply(names(updates), canonical, character(1))
 names(updates)[names(updates) == "details_notes"] <- "details"
 if (anyDuplicated(names(updates))) stop("Duplicate column names after normalization.")
-required <- c("quarter", "headline", "category", "details", "approved_for_ai")
+required <- c("quarter", "headline", "category", "details", "approved_for_publication")
 missing <- setdiff(required, names(updates))
 if (length(missing)) stop("Missing required columns: ", paste(missing, collapse = ", "))
 for (nm in c("date", "submitted_by", "photo_link", "photo_credit", "photo_caption", "source_link", "link_text", "editorial_notes")) {
