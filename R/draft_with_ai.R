@@ -247,7 +247,11 @@ story_schema <- ellmer::type_array(
   description = paste(
     "Return EXACTLY one story for EVERY supplied record.",
     "Use each exact source_id once, without omissions or additions.",
-    "Order the strongest story first while covering all records.",
+    "Order all stories by editorial newsworthiness; cover highlights will",
+    "use the first three. Prioritize published papers or findings, awards,",
+    "major research milestones, and substantial talks or presentations",
+    "when those are explicitly supported by the records, followed by other updates.",
+    "Do not imply publication, results, novelty, or significance unless stated.",
     "Shorten writing, not the number of stories.",
     "Do not invent facts to fill space."
   )
@@ -266,6 +270,12 @@ prompt <- paste0(
   
   "Include EVERY approved update below exactly once. ",
   "No ranking, omission, deletion or merger of records.\n",
+  "Order stories by editorial newsworthiness; the first three will be featured ",
+  "as cover highlights. When supported by the records, prioritize published ",
+  "papers or findings, awards, major research milestones, and substantial ",
+  "talks or presentations, then include other updates. Do not imply publication, ",
+  "results, novelty, or significance unless explicitly stated. All updates must ",
+  "still appear in the newsletter.\n",
   
   "Write polished, scholarly but accessible newsletter prose ",
   "using only supplied factual details. Favor precise language, ",

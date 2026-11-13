@@ -308,14 +308,14 @@ render_card <- function(i) {
   paste0(
     '<article class="story', if (i %% 2L) ' sage' else '',
     if (has_photo) ' has-photo' else ' no-photo', '">',
-    '<span class="tag">', sprintf("%02d", i), ' / LAB UPDATES</span>',
+    '<span class="tag"><span class="tag-number">', sprintf("%02d", i),
+    '</span><span class="tag-category">', s[[i]]$category, '</span></span>',
     '<div class="rule"></div>',
     '<div class="story-inner">',
     if (has_photo) photo_html[i] else '',
     '<div class="story-copy">',
     '<h3>', s[[i]]$title, '</h3>',
     '<p>', s[[i]]$body, '</p>',
-    '<p class="note">', s[[i]]$category, '</p>',
     story_links[i],
     '</div></div></article>'
   )
@@ -367,15 +367,11 @@ if (length(page3_indices)) {
     '<span>03 / 03</span></footer></section>')
 }
 
-menu <- if (story_count <= 5L) {
-  paste(vapply(seq_len(story_count), function(i) {
-    paste0('<div><b>', sprintf("%02d", i), '</b> ',
-           esc(shorten(stories$title[i], 28L)), '</div>')
-  }, character(1)), collapse = "\n")
-} else {
-  paste0('<div><b>', story_count, '</b> approved updates in this issue</div>',
-         '<div>Research · Fieldwork · People · Lab news</div>')
-}
+highlight_indices <- seq_len(min(3L, story_count))
+menu <- paste(vapply(highlight_indices, function(i) {
+  paste0('<div><b>', sprintf("%02d", i), '</b> ',
+         esc(shorten(stories$title[i], 42L)), '</div>')
+}, character(1)), collapse = "\n")
 
 
 

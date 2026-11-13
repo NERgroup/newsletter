@@ -755,3 +755,146 @@ h1 {
 .feature-main .story-link { margin-top: 12px; font-size: 11px; }
 .story-copy .story-link { margin-top: 9px; }
 .story-link:focus-visible { outline: 2px solid #176f63; outline-offset: 3px; }
+
+/* Three stories on the final page work better as compact horizontal rows. */
+.page-three .third-stories.item-count-3 {
+  grid-template-columns: minmax(0, 1fr);
+  gap: .12in;
+  margin-top: .20in;
+}
+.page-three .third-stories.item-count-3 .story {
+  min-height: 0;
+  padding: .12in .16in;
+}
+.page-three .third-stories.item-count-3 .story-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45in) minmax(0, 1fr);
+  gap: .20in;
+  align-items: start;
+}
+.page-three .third-stories.item-count-3 .story-inner .story-photo {
+  margin: 0;
+}
+.page-three .third-stories.item-count-3 .story-inner .story-photo img {
+  max-height: .95in;
+}
+.page-three .third-stories.item-count-3 .story-copy h3 {
+  margin: 0 0 6px;
+}
+.page-three .third-stories.item-count-3 .story-copy p {
+  font-size: 11px;
+  line-height: 1.4;
+}
+.page-three .third-stories.item-count-3 .story-copy .note {
+  margin-top: 6px !important;
+}
+.page-three .third-stories.item-count-3 .story.no-photo .story-copy {
+  grid-column: 1 / -1;
+}
+
+/* Interior pages: a consistent scholarly editorial card system. */
+.page-two,
+.page-three {
+  background: #fbfaf6;
+}
+.page-two-head {
+  position: relative;
+  border-bottom: 1px solid #b8c9bf;
+}
+.page-two-head::after {
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: .62in;
+  height: 3px;
+  background: var(--gold);
+  content: "";
+}
+.page-two-head h2 {
+  font-size: 45px;
+  line-height: 1;
+  letter-spacing: -1.8px;
+}
+.feature-block {
+  margin-top: .18in;
+  padding: .22in .24in;
+  border: 1px solid #d8e3dc;
+  border-left: 4px solid var(--gold);
+  border-radius: 3px;
+  background: #fff;
+}
+.feature-block.story-count-1 {
+  padding-top: .24in;
+}
+.feature-number {
+  display: inline-block;
+  margin: 0;
+  padding: 5px 8px;
+  border-radius: 2px;
+  background: #e8f0e9;
+  color: var(--forest);
+}
+.feature-main h3 {
+  font-size: 29px;
+  line-height: 1.08;
+  letter-spacing: -.6px;
+}
+.secondary-list .story,
+.third-stories .story {
+  border: 1px solid #d9e3dc;
+  border-top: 3px solid var(--teal);
+  border-radius: 3px;
+  background: #fff;
+}
+.secondary-list .story.sage,
+.third-stories .story.sage {
+  border-top-color: var(--gold);
+  background: #f1f6f2;
+}
+.tag {
+  display: flex;
+  align-items: center;
+  gap: .10in;
+  letter-spacing: 0;
+}
+.tag-number {
+  color: var(--forest);
+  font-size: 9px;
+  font-weight: 800;
+}
+.tag-category {
+  padding: 3px 7px;
+  border-radius: 2px;
+  background: #e8f0e9;
+  color: #317f70;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+.rule {
+  height: 2px;
+  margin: .10in 0 .12in;
+}
+.secondary-list .story h3,
+.third-stories .story h3 {
+  font-size: 19px;
+  line-height: 1.15;
+  letter-spacing: -.25px;
+}
+.secondary-list .story p,
+.third-stories .story p {
+  color: #344a45;
+  line-height: 1.45;
+}
+.page-two .closing,
+.page-three .closing {
+  border-radius: 3px;
+  background: #153f38;
+}
+@media screen {
+  .feature-block,
+  .secondary-list .story,
+  .third-stories .story {
+    box-shadow: 0 3px 12px rgba(25, 58, 53, .07);
+  }
+}
