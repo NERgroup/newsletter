@@ -19,6 +19,10 @@ In the **Updates** tab, use the existing `Source link` column for an absolute `h
 
 Only entries for the selected quarter with `Approved for publication = Yes` are sent to AI drafting. The generated newsletter remains an editorial draft and must still be reviewed before distribution. Links are taken exactly from the source row, not written or changed by AI. They show on both featured and secondary cards. HTML and PDFs printed from Chrome should retain the clickable link targets, provided print-to-PDF preserves hyperlinks.
 
+## Add story photographs
+
+In the **Updates** tab, `Photo link` accepts up to four image links for a story. Put one Google Drive link per line, or separate links with spaces or semicolons. The links must point to JPG, JPEG, PNG, or WebP files directly inside that quarter's `media/YYYY_QN` folder. Multiple images are arranged as a collage; the row's `Photo credit` applies to all of them.
+
 ## Run
 
 From the RStudio **Console**:
@@ -32,4 +36,4 @@ A private browser preview is generated at `drafts/2026-Q4/two_page/index.html`. 
 
 ## Check
 
-The newsletter output directory contains `link_manifest.csv` with one row per included story and its destination URL and label. `inclusion_report.csv` also records which stories have links. Open the HTML and click the link. In the browser, print with Letter paper, zero margins, background graphics enabled, and verify that the PDF remains at most three pages with no layout warnings. The intro / Looking Ahead prompts discourage duplicate updates but still require human editorial review.
+The newsletter output directory contains `link_manifest.csv` with one row per included story and its destination URL and label. `inclusion_report.csv` also records which stories have links. Open the HTML and click the link. In the browser, print with Letter paper, zero margins, background graphics enabled, and verify that every generated page fits without layout warnings. Longer issues may use additional pages so stories are not clipped. The intro / Looking Ahead prompts discourage duplicate updates but still require human editorial review.

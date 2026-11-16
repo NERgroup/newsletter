@@ -181,6 +181,10 @@ chat <- ellmer::chat_openai(
     "generic enthusiasm, and repeated ideas.",
     "Use field-specific terms when they improve precision, but avoid",
     "unexplained jargon and needless complexity.",
+    "Use the relevant detail provided in each record, including context,",
+    "collaborators, setting, methods, aims, and reported outcomes when available.",
+    "For substantive records, usually write three or four connected sentences;",
+    "do not reduce a multi-fact update to a generic one-sentence summary.",
     "Preserve distinctions among research aims, methods, observations,",
     "findings, interpretations, and planned work.",
     "Do not overstate the significance of research.",
@@ -188,7 +192,8 @@ chat <- ellmer::chat_openai(
     "",
     "FORMAT:",
     "Return structured newsletter stories.",
-    "Target one cover and no more than two content pages.",
+    "Write enough for a readable, self-contained story for every record;",
+    "the layout may use additional content pages rather than compressing stories.",
     "Do not introduce contextual claims simply to make",
     "the writing more engaging or complete.",
     "Every factual statement in the body must be",
@@ -223,8 +228,9 @@ story_schema <- ellmer::type_array(
         "Polished, scholarly but readable newsletter prose only.",
         "Use precise, well-crafted sentences and strong verbs.",
         "Do not add interpretation or context absent from the records.",
-        "First story maximum 300 characters;",
-        "other stories maximum 210 characters.",
+        "Use three or four connected sentences when the source notes support them.",
+        "First story maximum 600 characters;",
+        "other stories maximum 450 characters.",
         "No editorial comments or missing-data notes."
       )
     ),
@@ -289,10 +295,12 @@ prompt <- paste0(
   
   "Place those comments exclusively in review_notes.\n",
   
-  "The first story should be no longer than ",
-  "300 characters; each later story no longer ",
-  "than 210 characters. If many stories are supplied, ",
-  "use especially concise prose.\n\n",
+  "Use the available factual detail to tell a complete, concise story, not merely ",
+      "to restate the headline. For substantive records, aim for three or four connected ",
+      "sentences that include relevant context, people, setting, methods, aims, and ",
+      "reported outcomes when supplied. A sparse record may be shorter; never pad or ",
+      "invent information. The first story may be up to 600 characters; each later ",
+      "story may be up to 450 characters.\n\n",
   
   "SOURCE RECORDS:\n",
   source_json
@@ -334,7 +342,7 @@ source_index <- match(
 ai_stories$original_headline <- eligible$headline[source_index]
 ai_stories$original_details <- eligible$details[source_index]
 
-max_body <- c(300L, rep(210L, max(0L, nrow(ai_stories) - 1L)))
+max_body <- c(600L, rep(450L, max(0L, nrow(ai_stories) - 1L)))
 
 ai_stories$length_warning <- (
   nchar(ai_stories$body) > max_body |

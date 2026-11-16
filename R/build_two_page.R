@@ -105,12 +105,31 @@ esc <- function(x) {
 }
 
 story_count <- nrow(stories)
-if (story_count > 8L) {
-  warning(story_count, " stories may not fit in three printed pages. ",
-          "All will be rendered, but the layout warning must be resolved before publishing.",
-          call. = FALSE)
+split_story_pages <- function(indices, page_capacity = 4L) {
+  if (!length(indices)) return(list())
+
+  page_total <- as.integer(ceiling(length(indices) / page_capacity))
+  group_sizes <- rep.int(length(indices) %/% page_total, page_total)
+  remainder <- length(indices) %% page_total
+  if (remainder > 0L) {
+    group_sizes[seq_len(remainder)] <- group_sizes[seq_len(remainder)] + 1L
+  }
+  split(indices, rep(seq_len(page_total), times = group_sizes))
 }
-page_count <- if (story_count > 3L) 3L else 2L
+
+# Keep room for the closing on small issues; larger issues use both secondary slots.
+page2_capacity <- if (story_count >= 4L) 2L else 1L
+page2_last <- min(story_count, 1L + page2_capacity)
+page2_indices <- if (story_count > 1L) seq.int(2L, page2_last) else integer(0)
+extra_indices <- if (page2_last < story_count) {
+  seq.int(page2_last + 1L, story_count)
+} else integer(0)
+extra_page_groups <- split_story_pages(extra_indices)
+page_count <- 2L + length(extra_page_groups)
+story_pages <- rep.int(2L, story_count)
+for (page_i in seq_along(extra_page_groups)) {
+  story_pages[extra_page_groups[[page_i]]] <- page_i + 2L
+}
 s <- lapply(seq_len(story_count), function(i) {
   list(
     title = esc(stories$title[i]),
@@ -190,32 +209,62 @@ photo_orientation <- "no-photo"
 photo_manifest <- data.frame(
   story = seq_len(story_count),
   headline = as.character(stories$title),
+  photo_count = integer(story_count),
   filename = rep(NA_character_, story_count),
   credit = rep(NA_character_, story_count),
   stringsAsFactors = FALSE
 )
 
+split_photo_links <- function(x) {
+  if (!length(x) || is.na(x) || !nzchar(trimws(x))) return(character())
+
+  links <- trimws(unlist(
+    strsplit(as.character(x), "[[:space:];]+"),
+    use.names = FALSE
+  ))
+  links <- links[nzchar(links)]
+
+  if (length(links) > 4L) {
+    stop("Each story can have at most four Photo links; select the best four.")
+  }
+  if (anyDuplicated(links)) stop("Duplicate Photo links found in a story.")
+  links
+}
+
 for (i in seq_len(story_count)) {
-  link <- sheet$photo_link[idx[i]]
-  if (is.na(link) || !nzchar(trimws(link))) next
+  photo_links <- split_photo_links(sheet$photo_link[idx[i]])
+  if (!length(photo_links)) next
 
-  photo <- googledrive::drive_get(googledrive::as_id(link))
-  if (!(as.character(photo$id[[1]]) %in% as.character(quarter_files$id))) {
-    stop("Photo for story ", i, " is not directly inside media/", folder_name,
-         ": ", stories$title[i])
-  }
+  local_names <- character(length(photo_links))
+  for (j in seq_along(photo_links)) {
+    photo <- googledrive::drive_get(googledrive::as_id(photo_links[j]))
+    if (nrow(photo) != 1L) {
+      stop("Each Photo link must identify exactly one image: ", stories$title[i])
+    }
+    if (!(as.character(photo$id[[1]]) %in% as.character(quarter_files$id))) {
+      stop("Photo for story ", i, " is not directly inside media/", folder_name,
+           ": ", stories$title[i])
+    }
 
-  ext <- tolower(tools::file_ext(photo$name[[1]]))
-  if (!(ext %in% c("jpg", "jpeg", "png", "webp"))) {
-    stop("Photo for story ", i, " must be JPG, PNG, or WebP")
+    ext <- tolower(tools::file_ext(photo$name[[1]]))
+    if (!(ext %in% c("jpg", "jpeg", "png", "webp"))) {
+      stop("Photo for story ", i, " must be JPG, PNG, or WebP")
+    }
+    local_names[j] <- sprintf("story-%02d-%02d.%s", i, j, ext)
+    googledrive::drive_download(
+      file = photo,
+      path = file.path(out_dir, local_names[j]),
+      overwrite = TRUE
+    )
   }
-  local_name <- sprintf("story-%02d.%s", i, ext)
-  path <- file.path(out_dir, local_name)
-  googledrive::drive_download(file = photo, path = path, overwrite = TRUE)
 
   if (i == 1L) {
-    if (requireNamespace("magick", quietly = TRUE)) {
-      im <- magick::image_info(magick::image_read(path))
+    if (length(local_names) > 1L) {
+      photo_orientation <- "landscape"
+    } else if (requireNamespace("magick", quietly = TRUE)) {
+      im <- magick::image_info(
+        magick::image_read(file.path(out_dir, local_names[1]))
+      )
       ratio <- im$width[1] / im$height[1]
       photo_orientation <- if (ratio < 0.85) "portrait" else if (ratio > 1.2) "landscape" else "square"
     } else {
@@ -237,12 +286,24 @@ for (i in seq_len(story_count)) {
     paste0("<figcaption>", paste(vapply(caption_bits, esc, character(1)), collapse = " · "), "</figcaption>")
   } else ""
 
-  photo_html[i] <- paste0(
-    '<figure class="', if (i == 1L) "feature-photo" else "story-photo", '">',
-    '<img src="', esc(local_name), '" alt="Photo accompanying ',
-    esc(shorten(stories$title[i], 90L)), '">', caption_html, '</figure>'
+  figure_class <- if (i == 1L) "feature-photo" else "story-photo"
+  image_tags <- paste0(
+    '<img src="', esc(local_names), '" alt="Photo ', seq_along(local_names),
+    ' accompanying ', esc(shorten(stories$title[i], 90L)), '">'
   )
-  photo_manifest$filename[i] <- local_name
+  if (length(local_names) > 1L) {
+    figure_class <- paste(figure_class, "photo-gallery", paste0("photo-count-", length(local_names)))
+    photo_html[i] <- paste0(
+      '<figure class="', figure_class, '"><div class="photo-grid">',
+      paste(image_tags, collapse = "\n"), '</div>', caption_html, '</figure>'
+    )
+  } else {
+    photo_html[i] <- paste0(
+      '<figure class="', figure_class, '">', image_tags, caption_html, '</figure>'
+    )
+  }
+  photo_manifest$photo_count[i] <- length(local_names)
+  photo_manifest$filename[i] <- paste(local_names, collapse = "; ")
   photo_manifest$credit[i] <- if (nzchar(credit)) credit else NA_character_
   if (!nzchar(credit)) {
     warning("No Photo credit for story ", i, " (", stories$original_headline[i],
@@ -295,13 +356,8 @@ message("Downloaded linked photos for ", sum(nzchar(photo_html)), " of ", story_
 write.csv(photo_manifest, file.path(out_dir, "photo_manifest.csv"), row.names = FALSE, na = "")
 write.csv(link_manifest, file.path(out_dir, "link_manifest.csv"), row.names = FALSE, na = "")
 
-# Every story is included. Up to three stories: two pages total.
-# Four or more: page 2 has the feature plus up to two cards;
-# page 3 receives ALL remaining cards. Never silently discard a row.
-page2_indices <- if (story_count >= 2L) {
-  seq.int(2L, min(story_count, 3L))
-} else integer(0)
-page3_indices <- if (story_count >= 4L) seq.int(4L, story_count) else integer(0)
+# Keep page 2 focused on the feature while using its existing one- or two-card
+# layouts. Flow remaining stories across additional pages in balanced groups.
 
 render_card <- function(i) {
   has_photo <- nzchar(photo_html[i])
@@ -354,17 +410,24 @@ make_closing <- function(text) paste0(
 page2_closing <- if (page_count == 2L) make_closing(closing) else ""
 
 extra_page <- ""
-if (length(page3_indices)) {
-  page3_cards <- paste(vapply(page3_indices, render_card, character(1)), collapse = "\n")
-  extra_page <- paste0(
-    '<section class="page page-three count-', length(page3_indices), '">',
-    '<header class="page-two-head"><div><span class="eyebrow">KELP KORNER / ', esc(toupper(season_label)),
-    '</span><h2>More from<br>the field<span class="period">.</span></h2></div>',
-    '<div class="header-lab-logo"><img src="smith-lab-logo.png" alt="Smith Lab logo"></div></header>',
-    '<div class="third-stories item-count-', length(page3_indices), '">', page3_cards, '</div>',
-    make_closing(closing),
-    '<footer class="page-two-footer"><span>NEARSHORE ECOLOGY RESEARCH GROUP · UC SANTA CRUZ</span>',
-    '<span>03 / 03</span></footer></section>')
+if (length(extra_page_groups)) {
+  extra_page <- paste(vapply(seq_along(extra_page_groups), function(page_i) {
+    page_indices <- extra_page_groups[[page_i]]
+    page_cards <- paste(vapply(page_indices, render_card, character(1)), collapse = "\n")
+    page_number <- page_i + 2L
+    closing_panel <- if (page_i == length(extra_page_groups)) make_closing(closing) else ""
+
+    paste0(
+      '<section class="page page-three count-', length(page_indices), '">',
+      '<header class="page-two-head"><div><span class="eyebrow">KELP KORNER / ', esc(toupper(season_label)),
+      '</span><h2>More from<br>the field<span class="period">.</span></h2></div>',
+      '<div class="header-lab-logo"><img src="smith-lab-logo.png" alt="Smith Lab logo"></div></header>',
+      '<div class="third-stories item-count-', length(page_indices), '">', page_cards, '</div>',
+      closing_panel,
+      '<footer class="page-two-footer"><span>NEARSHORE ECOLOGY RESEARCH GROUP · UC SANTA CRUZ</span>',
+      '<span>', sprintf("%02d / %02d", page_number, page_count), '</span></footer></section>'
+    )
+  }, character(1)), collapse = "\n")
 }
 
 highlight_indices <- seq_len(min(3L, story_count))
@@ -411,8 +474,7 @@ writeLines(html, output, useBytes = TRUE)
 report <- data.frame(
   source_headline = as.character(sheet$headline[idx]),
   output_title = as.character(stories$title),
-  page = ifelse(seq_len(story_count) == 1L, 2L,
-                ifelse(seq_len(story_count) %in% page2_indices, 2L, 3L)),
+  page = story_pages,
   photo_linked = nzchar(photo_html),
   photo_credit_present = !is.na(sheet$photo_credit[idx]) & nzchar(trimws(sheet$photo_credit[idx])),
   photo_caption_present = !is.na(sheet$photo_caption[idx]) & nzchar(trimws(sheet$photo_caption[idx])),

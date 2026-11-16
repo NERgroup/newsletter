@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Kelp Korner | {{ISSUE_TITLE}}</title><link rel="stylesheet" href="issue.css"></head><body>
-<div id="layout-warning" role="alert" hidden>WARNING: Some approved stories may not fit on three pages. Do not publish this issue; shorten text or adjust layout, then rebuild.</div>
+<div id="layout-warning" role="alert" hidden>WARNING: Content extends beyond a page. Do not publish until every page fits; review the layout and rebuild.</div>
 <main>
   <section class="page page-one">
     <div class="cover-photo" role="img" aria-label="Quarterly Kelp Korner cover photograph">
@@ -20,8 +20,8 @@
   <section class="page page-two">
     <header class="page-two-head"><div><span class="eyebrow">KELP KORNER / {{SEASON}}</span><h2>Notes from<br>the nearshore<span class="period">.</span></h2></div><div class="header-lab-logo"><img src="smith-lab-logo.png" alt="Smith Lab logo"></div></header>
     <div class="feature-block {{FEATURE_CLASS}}">
-      <div class="feature-left"><div class="feature-number">01 / FEATURED UPDATE</div>{{FEATURE_MEDIA}}</div>
-      <div class="feature-main"><h3>{{STORY1_TITLE}}</h3><p>{{STORY1_BODY}}</p><p class="micro">{{STORY1_CATEGORY}}</p>{{STORY1_LINK}}</div>
+      <div class="feature-left"><div class="feature-number">01 / FEATURED UPDATE</div>{{FEATURE_MEDIA}}{{STORY1_LINK}}</div>
+      <div class="feature-main"><h3>{{STORY1_TITLE}}</h3><p>{{STORY1_BODY}}</p><p class="micro">{{STORY1_CATEGORY}}</p></div>
     </div>
     {{SECONDARY_STORIES}}
     {{PAGE2_CLOSING}}
