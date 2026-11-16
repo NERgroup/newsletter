@@ -105,7 +105,7 @@ esc <- function(x) {
 }
 
 story_count <- nrow(stories)
-split_story_pages <- function(indices, page_capacity = 4L) {
+split_story_pages <- function(indices, page_capacity = 2L) {
   if (!length(indices)) return(list())
 
   page_total <- as.integer(ceiling(length(indices) / page_capacity))

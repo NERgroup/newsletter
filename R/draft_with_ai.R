@@ -228,9 +228,10 @@ story_schema <- ellmer::type_array(
         "Polished, scholarly but readable newsletter prose only.",
         "Use precise, well-crafted sentences and strong verbs.",
         "Do not add interpretation or context absent from the records.",
-        "Use three or four connected sentences when the source notes support them.",
+        "Use three to five connected sentences when the source notes support them.",
+        "Avoid meta-commentary about what the source does not report; keep limitations in review_notes.",
         "First story maximum 600 characters;",
-        "other stories maximum 450 characters.",
+        "other stories maximum 600 characters.",
         "No editorial comments or missing-data notes."
       )
     ),
@@ -298,9 +299,10 @@ prompt <- paste0(
   "Use the available factual detail to tell a complete, concise story, not merely ",
       "to restate the headline. For substantive records, aim for three or four connected ",
       "sentences that include relevant context, people, setting, methods, aims, and ",
-      "reported outcomes when supplied. A sparse record may be shorter; never pad or ",
-      "invent information. The first story may be up to 600 characters; each later ",
-      "story may be up to 450 characters.\n\n",
+      "reported outcomes when supplied. Aim for four connected sentences and include ",
+      "additional relevant details when the notes support them. A sparse record may be shorter; ",
+      "never pad, repeat, or invent information. Keep missing-information commentary out of the body. ",
+      "Every story may be up to 600 characters.\n\n",
   
   "SOURCE RECORDS:\n",
   source_json
@@ -342,7 +344,7 @@ source_index <- match(
 ai_stories$original_headline <- eligible$headline[source_index]
 ai_stories$original_details <- eligible$details[source_index]
 
-max_body <- c(600L, rep(450L, max(0L, nrow(ai_stories) - 1L)))
+max_body <- rep(600L, nrow(ai_stories))
 
 ai_stories$length_warning <- (
   nchar(ai_stories$body) > max_body |

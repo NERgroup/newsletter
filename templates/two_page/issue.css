@@ -952,7 +952,7 @@ h1 {
   grid-template-columns: minmax(0, 1.8in) minmax(0, 1fr);
 }
 
-/* Compact interior pages: full-width text in two-column cards. */
+/* Photo-forward editorial layout. Keep all photographs uncropped. */
 .page-two-head { height: 1.35in; }
 .page-three .page-two-head { flex-basis: 1.35in; }
 .page-two-head h2 { font-size: 38px; }
@@ -994,13 +994,66 @@ h1 {
 .secondary-list:not(:has(> :only-child)) .story p,
 .page-three .third-stories.item-count-3 .story p,
 .page-three .third-stories.item-count-4 .story p { font-size: 11px; line-height: 1.4; }
-.secondary-list:not(:has(> :only-child)) .story-inner .story-photo img,
-.page-three .third-stories.item-count-3 .story-inner .story-photo img,
-.page-three .third-stories.item-count-4 .story-inner .story-photo img { max-height: 1.2in; }
-.secondary-list:not(:has(> :only-child)) .story-inner .story-photo img { max-height: 1.35in; }
-.secondary-list:not(:has(> :only-child)) .photo-gallery .photo-grid img,
-.page-three .third-stories.item-count-3 .photo-gallery .photo-grid img,
-.page-three .third-stories.item-count-4 .photo-gallery .photo-grid img { max-height: .7in; }
+.story-photo {
+  padding: .04in;
+  border: 1px solid #d9e3dc;
+  border-radius: 4px;
+  background: #e8f0e9;
+}
+.secondary-list:not(:has(> :only-child)) .story-inner .story-photo img {
+  width: 100%;
+  height: 1.55in;
+  max-height: none;
+  object-fit: contain;
+  object-position: center;
+}
+.photo-gallery .photo-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: auto;
+  gap: 5px;
+}
+.photo-gallery .photo-grid img {
+  width: 100%;
+  height: .95in;
+  max-height: none;
+  padding: 2px;
+  border: 1px solid #d9e3dc;
+  background: #e8f0e9;
+  object-fit: contain;
+  justify-self: stretch;
+}
+.page-three .third-stories.item-count-2 {
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: max-content;
+  gap: .2in;
+}
+.page-three .third-stories.item-count-2 .story { padding: .16in .2in; }
+.page-three .third-stories.item-count-2 .story-inner:has(.story-photo) {
+  display: grid;
+  grid-template-columns: minmax(0, 2.25in) minmax(0, 1fr);
+  gap: .22in;
+  align-items: start;
+}
+.page-three .third-stories.item-count-2 .story-photo { margin: 0; }
+.page-three .third-stories.item-count-2 .story-inner .story-photo > img {
+  width: 100%;
+  height: 1.8in;
+  max-height: none;
+  object-fit: contain;
+  object-position: center;
+}
+.page-three .third-stories.item-count-2 .photo-gallery .photo-grid img {
+  height: .86in;
+}
+.page-three .third-stories.item-count-2 .story h3 {
+  font-size: 20px;
+  line-height: 1.12;
+  margin-bottom: 9px;
+}
+.page-three .third-stories.item-count-2 .story p {
+  font-size: 11px;
+  line-height: 1.48;
+}
 .page-three .closing { position: static; width: auto; margin-top: auto; }
 
 /* A single continuation story can use a wider, horizontal treatment. */
@@ -1010,4 +1063,47 @@ h1 {
   grid-template-columns: minmax(0, 1.8in) minmax(0, 1fr);
   gap: .22in;
   align-items: start;
+}
+
+/* Two secondary stories read more cleanly as aligned editorial rows. */
+.secondary-list:not(:has(> :only-child)) {
+  grid-template-columns: minmax(0, 1fr);
+  gap: .14in;
+}
+.secondary-list:not(:has(> :only-child)) .story {
+  padding: .14in .18in;
+}
+.secondary-list:not(:has(> :only-child)) .story-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 2.05in) minmax(0, 1fr);
+  gap: .22in;
+  align-items: start;
+}
+.secondary-list:not(:has(> :only-child)) .story-inner .story-photo {
+  height: 1.72in;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+.secondary-list:not(:has(> :only-child)) .story-inner .story-photo > img {
+  width: 100%;
+  height: 1.34in;
+  max-height: none;
+  object-fit: contain;
+  object-position: center;
+}
+.secondary-list:not(:has(> :only-child)) .story-inner .photo-gallery .photo-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+.secondary-list:not(:has(> :only-child)) .story-inner .photo-gallery .photo-grid img {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: contain;
+}
+.secondary-list:not(:has(> :only-child)) .story.no-photo .story-copy {
+  grid-column: 1 / -1;
 }
