@@ -560,9 +560,6 @@ h1 {
 .third-stories .story .note {margin-top:auto; padding-top:.2in;}
 .third-stories:has(> :only-child) {grid-template-columns: 1fr;}
 .page-three .closing {flex: 0 0 auto; min-height: 1.3in; margin-top: .24in;}
-@media print {
-  .page-three {break-after: auto; page-break-after: auto;}
-}
 
 /* ============================================================
    LINKED PHOTOS ON SECONDARY STORIES (PAGES 2 AND 3)
@@ -955,14 +952,62 @@ h1 {
   grid-template-columns: minmax(0, 1.8in) minmax(0, 1fr);
 }
 
-/* Preserve the stable two-column card grid while allowing content-led heights. */
-.page-two .secondary-list:not(:has(> :only-child)),
-.page-three .third-stories:not(.item-count-3) {
+/* Compact interior pages: full-width text in two-column cards. */
+.page-two-head { height: 1.35in; }
+.page-three .page-two-head { flex-basis: 1.35in; }
+.page-two-head h2 { font-size: 38px; }
+.feature-block.story-count-3 { padding: .16in .20in; }
+.feature-block.story-count-3 .feature-main h3 { font-size: 25px; }
+.feature-block.story-count-3 .feature-main p { line-height: 1.45; }
+.feature-block.story-count-3 .feature-photo img { max-height: 1.7in; }
+.secondary-list:not(:has(> :only-child)),
+.page-three .third-stories.item-count-3,
+.page-three .third-stories.item-count-4 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: max-content;
+  gap: .15in;
+  align-items: stretch;
+}
+.page-three .third-stories {
+  flex: 0 0 auto;
+  max-height: none;
+  margin-top: .22in;
+}
+.secondary-list .story,
+.page-three .third-stories .story { align-self: stretch; }
+.secondary-list:not(:has(> :only-child)) .story,
+.page-three .third-stories.item-count-3 .story,
+.page-three .third-stories.item-count-4 .story { padding: .14in .17in; }
+.secondary-list:not(:has(> :only-child)) .story-inner,
+.page-three .third-stories.item-count-3 .story-inner,
+.page-three .third-stories.item-count-4 .story-inner { display: block; }
+.secondary-list:not(:has(> :only-child)) .story .rule,
+.page-three .third-stories.item-count-3 .story .rule,
+.page-three .third-stories.item-count-4 .story .rule { margin: .08in 0; }
+.secondary-list:not(:has(> :only-child)) .story h3,
+.page-three .third-stories.item-count-3 .story h3,
+.page-three .third-stories.item-count-4 .story h3 {
+  font-size: 17px;
+  line-height: 1.15;
+  margin-bottom: 7px;
+}
+.secondary-list:not(:has(> :only-child)) .story p,
+.page-three .third-stories.item-count-3 .story p,
+.page-three .third-stories.item-count-4 .story p { font-size: 11px; line-height: 1.4; }
+.secondary-list:not(:has(> :only-child)) .story-inner .story-photo img,
+.page-three .third-stories.item-count-3 .story-inner .story-photo img,
+.page-three .third-stories.item-count-4 .story-inner .story-photo img { max-height: 1.2in; }
+.secondary-list:not(:has(> :only-child)) .story-inner .story-photo img { max-height: 1.35in; }
+.secondary-list:not(:has(> :only-child)) .photo-gallery .photo-grid img,
+.page-three .third-stories.item-count-3 .photo-gallery .photo-grid img,
+.page-three .third-stories.item-count-4 .photo-gallery .photo-grid img { max-height: .7in; }
+.page-three .closing { position: static; width: auto; margin-top: auto; }
+
+/* A single continuation story can use a wider, horizontal treatment. */
+.page-three .third-stories.item-count-1 { grid-template-columns: minmax(0, 1fr); }
+.page-three .third-stories.item-count-1 .story.has-photo .story-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8in) minmax(0, 1fr);
+  gap: .22in;
   align-items: start;
 }
-.page-two .secondary-list .story,
-.page-three .third-stories .story { align-self: start; }
-.page-three .third-stories.item-count-4 .story h3 { font-size: 17px; }
-.page-three .third-stories.item-count-4 .story p { font-size: 11px; line-height: 1.4; }
-.page-three .third-stories.item-count-4 .story-photo img { max-height: .95in; }

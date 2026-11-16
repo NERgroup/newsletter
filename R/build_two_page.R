@@ -117,7 +117,7 @@ split_story_pages <- function(indices, page_capacity = 4L) {
   split(indices, rep(seq_len(page_total), times = group_sizes))
 }
 
-# Keep room for the closing on small issues; larger issues use both secondary slots.
+# Pair the feature with up to two secondary stories.
 page2_capacity <- if (story_count >= 4L) 2L else 1L
 page2_last <- min(story_count, 1L + page2_capacity)
 page2_indices <- if (story_count > 1L) seq.int(2L, page2_last) else integer(0)
@@ -392,16 +392,44 @@ if (!all(c("introduction", "looking_ahead") %in% names(issue))) {
 }
 intro_raw <- trimws(as.character(issue$introduction))
 closing_raw <- trimws(as.character(issue$looking_ahead))
-if (!nzchar(intro_raw) || !nzchar(closing_raw)) stop("Empty issue introduction/closing")
+if (!nzchar(intro_raw)) stop("Empty issue introduction")
 if (nchar(intro_raw) > 230L || nchar(closing_raw) > 185L) {
   stop("Issue editorial text is too long for the design. Review the AI draft.")
 }
 intro <- esc(intro_raw)
+if (nzchar(closing_raw) && grepl(
+  "^[[:space:][:punct:]\u2018\u2019\u201c\u201d]*(i|we|you|he|she|it|they|their|also)\\b",
+  closing_raw, ignore.case = TRUE, perl = TRUE
+)) {
+  warning("Omitting looking-ahead text with a context-dependent opening; review the editorial draft.",
+          call. = FALSE)
+  closing_raw <- ""
+}
+# Flag near-verbatim repeats; keep the original in the editorial draft for review.
+closing_terms <- function(text) {
+  words <- unique(unlist(strsplit(tolower(text), "[^[:alnum:]]+")))
+  words[nchar(words) >= 3L & !words %in% c(
+    "the", "and", "for", "will", "with", "that", "this", "from", "their",
+    "has", "have", "was", "are", "she", "her", "his", "they", "phd", "student"
+  )]
+}
+if (nzchar(closing_raw)) {
+  terms <- closing_terms(closing_raw)
+  repeated <- length(terms) >= 4L && any(vapply(seq_len(story_count), function(i) {
+    story_terms <- closing_terms(paste(stories$title[i], stories$body[i]))
+    mean(terms %in% story_terms) >= 0.9
+  }, logical(1)))
+  if (repeated) {
+    warning("Omitting looking-ahead text that closely repeats a story; review the editorial draft.",
+            call. = FALSE)
+    closing_raw <- ""
+  }
+}
 closing <- esc(closing_raw)
 intro_heading <- "This quarter in the nearshore."
 
 # The closing is shown only on the final content page.
-make_closing <- function(text) paste0(
+make_closing <- function(text) if (!nzchar(text)) "" else paste0(
   '<div class="closing"><div class="closing-eyebrow">LOOKING AHEAD</div>',
   '<p>', text, '</p><div class="closing-links">',
   '<span>FOLLOW THE RESEARCH</span>',
@@ -447,7 +475,7 @@ replacements <- c(
   INTRO = intro,
   INTRO_HEADING = intro_heading,
   ISSUE_MENU = menu,
-  FEATURE_CLASS = paste0("story-count-", min(story_count, 3L), " ", photo_orientation),
+  FEATURE_CLASS = paste0("story-count-", 1L + length(page2_indices), " ", photo_orientation),
   FEATURE_MEDIA = feature_media,
   STORY1_TITLE = s[[1]]$title,
   STORY1_BODY = s[[1]]$body,

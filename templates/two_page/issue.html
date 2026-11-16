@@ -40,12 +40,16 @@
       const overlap = closing && footer &&
         closing.getBoundingClientRect().bottom > footer.getBoundingClientRect().top - 10;
       const cards = page.querySelectorAll('.story');
-      const storyOverlap = Array.from(cards).some(card => closing &&
-        card.getBoundingClientRect().bottom > closing.getBoundingClientRect().top - 8);
+      const storyOverlap = Array.from(cards).some(card =>
+        (closing && card.getBoundingClientRect().bottom > closing.getBoundingClientRect().top - 8) ||
+        (footer && card.getBoundingClientRect().bottom > footer.getBoundingClientRect().top - 8));
       const innerOverflow = Array.from(cards).some(card =>
         card.scrollHeight > card.clientHeight + 2);
+      const feature = page.querySelector('.feature-block');
+      const featureOverflow = feature && (feature.scrollHeight > feature.clientHeight + 2 ||
+        (footer && feature.getBoundingClientRect().bottom > footer.getBoundingClientRect().top - 8));
       const taller = page.scrollHeight > page.clientHeight + 2;
-      return overlap || taller || storyOverlap || innerOverflow;
+      return overlap || taller || storyOverlap || innerOverflow || featureOverflow;
     });
     warning.hidden = !overflow;
   }

@@ -362,9 +362,16 @@ issue_schema <- ellmer::type_object(
   introduction = ellmer::type_string(
     "One or two concise, reader-facing sentences summarizing this quarter. No invented facts. 230 characters maximum."),
   looking_ahead = ellmer::type_string(
-    "Specific, source-supported future activities only. If none stated, return an empty string. 170 characters maximum."),
+    paste("Standalone, complete forward-looking copy about explicitly documented future activities only.",
+          "Do not repeat a main story or open with a pronoun or 'also'.",
+          "If no distinct future activity is documented, return an empty string. 170 characters maximum.")),
   editorial_notes = ellmer::type_string(
-    "Briefly flag anything unclear or unsupported for the human editor.")
+    paste("Briefly flag anything unclear or unsupported for the human editor.",
+          "For nonempty looking-ahead copy, identify the supporting source_id(s) and explicit future plans."))
+)
+story_context_json <- jsonlite::toJSON(
+  ai_stories[, c("source_id", "title", "body"), drop = FALSE],
+  dataframe = "rows", auto_unbox = TRUE, na = "null", pretty = TRUE
 )
 issue_prompt <- paste0(
   "Write two short editorial components for Kelp Korner ", quarter, ".\n",
@@ -375,26 +382,41 @@ issue_prompt <- paste0(
   "Do not manufacture a shared theme, causal relationship, or broader claim. ",
   "When the updates are unrelated, give a concise factual overview instead. ",
   "No generic welcome.\n",
-  "Looking ahead: only mention explicit, distinct planned or upcoming work. ",
-  "Do not repeat the same field activity already reported as a main story ",
-  "unless the notes explicitly describe a separate future milestone. ",
-  "If nothing distinct is documented, return an empty string.\n",
+  "Looking ahead: write a standalone, complete sentence that names its subject and makes sense ",
+  "without the preceding stories. Do not begin with a pronoun or 'also'. ",
+  "Mention only specific planned or upcoming work explicitly stated in the records; ",
+  "do not infer future work from ongoing or completed activities. Avoid repeating an activity ",
+  "covered in the drafted main stories below, even in different words; a separately documented future milestone ",
+  "may be used if distinct. If nothing distinct is documented, return an empty string. ",
+  "For nonempty looking-ahead copy, identify its supporting source_id(s) and the explicit ",
+  "future plans in editorial_notes, not in the reader-facing copy.\n",
   "No markdown, titles, credits or source-discussion in introduction/looking_ahead.\n",
+  "DRAFTED STORIES (for checking repetition only, not a factual source):\n", story_context_json, "\n",
   "RECORDS:\n", source_json
 )
 issue_editorial <- chat$chat_structured(issue_prompt, type = issue_schema, echo = "none")
 intro_text <- trimws(as.character(issue_editorial$introduction))
 closing_text <- trimws(as.character(issue_editorial$looking_ahead))
+editorial_notes <- trimws(as.character(issue_editorial$editorial_notes))
 if (!nzchar(intro_text) || nchar(intro_text) > 230L) {
   warning("AI introduction is missing or too long; using a safe fallback.", call. = FALSE)
   intro_text <- paste("Research, fieldwork, and lab updates from", quarter, "at the Nearshore Ecology Research Group.")
 }
 if (nchar(closing_text) > 170L) {
-  warning("AI looking-ahead text exceeds 170 characters; using standard closing.", call. = FALSE)
+  warning("AI looking-ahead text exceeds 170 characters; leaving it empty for review.", call. = FALSE)
   closing_text <- ""
 }
-if (!nzchar(closing_text)) {
-  closing_text <- "More field notes, more voices, and more discoveries—one quarter at a time."
+if (nzchar(closing_text)) {
+  # Conservative heuristic: demonstratives and possessives can also be determiners.
+  opening <- sub("^[[:space:][:punct:]\u2018\u2019\u201c\u201d]+", "", closing_text)
+  if (grepl("^(i|me|my|mine|we|us|our|ours|you|your|yours|he|him|his|she|her|hers|it|its|they|them|their|theirs|this|that|these|those|one|also)\\b",
+            opening, ignore.case = TRUE, perl = TRUE)) {
+    warning("Looking-ahead text may have a dependent or 'also' opening; review it before publication.", call. = FALSE)
+    editorial_notes <- paste(editorial_notes,
+                             "Review the looking-ahead opening: it may not stand alone.")
+  }
+  editorial_notes <- paste(editorial_notes,
+                           "Review looking-ahead copy against the cited source records for explicit future plans, distinctness, and accuracy.")
 }
 
 # ------------------------------------------------------------
@@ -447,7 +469,7 @@ write.csv(
 issue_path <- sub("\\.csv$", "_issue.json", csv_path)
 jsonlite::write_json(
   list(introduction = intro_text, looking_ahead = closing_text,
-       editorial_notes = as.character(issue_editorial$editorial_notes)),
+       editorial_notes = editorial_notes),
   issue_path, auto_unbox = TRUE, pretty = TRUE
 )
 
@@ -472,7 +494,7 @@ md <- c(
   "",
   closing_text,
   "",
-  paste0("**Editorial notes:** ", as.character(issue_editorial$editorial_notes)),
+  paste0("**Editorial notes:** ", editorial_notes),
   ""
 )
 
